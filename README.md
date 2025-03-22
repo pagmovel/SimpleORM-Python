@@ -39,8 +39,8 @@ pip install sqlalchemy psycopg2-binary
     "dev": {
       "database": "pgsql",
       "dbname": "postgres_dev",
-      "user": "postgres",
-      "password": "postgres",
+      "user": "nem_a_pau",
+      "password": "nem_a_pau_mesmo",
       "host": "192.168.1.20",
       "port": "5432",
       "schema": "public"
@@ -48,8 +48,8 @@ pip install sqlalchemy psycopg2-binary
     "prod": {
       "database": "pgsql",
       "dbname": "postgres_prod",
-      "user": "postgres",
-      "password": "postgres",
+      "user": "nem_a_pau",
+      "password": "nem_a_pau_mesmo",
       "host": "192.168.1.21",
       "port": "5432",
       "schema": "public"
@@ -57,8 +57,8 @@ pip install sqlalchemy psycopg2-binary
     "auxiliar": {
       "database": "pgsql",
       "dbname": "postgres_prod",
-      "user": "postgres",
-      "password": "postgres",
+      "user": "nem_a_pau",
+      "password": "nem_a_pau_mesmo",
       "host": "192.168.1.22",
       "port": "5433",
       "schema": "public"

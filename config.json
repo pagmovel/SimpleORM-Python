@@ -34,14 +34,14 @@
         "server": "ldap://192.168.12.1",
         "user": "admin nemaapau",
         "password": "nemaapau@2231",
-        "base_dn": "OU=nemaapau,DC=nemaapau,DC=adv,DC=br"
+        "base_dn": "OU=nemaapau,DC=nemaapau,DC=com,DC=br"
     },
     "require_email": true,
     "email": {
         "host": "smtp.nemaapau.com",
         "port": 587,
         "secure": true,
-        "user": "centralnemaapau@nemaapau.adv.br",
+        "user": "centralnemaapau@nemaapau.com.br",
         "password": "nemaapau@2210"
     }
 
