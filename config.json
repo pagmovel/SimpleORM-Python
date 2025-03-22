@@ -1,0 +1,48 @@
+{
+    "ambiente": "dev",
+    "database": {
+        "prod": {
+            "database": "pgsql",
+            "dbname": "postgres",
+            "user": "postgres",
+            "password": "postgres",
+            "host": "192.168.1.21",
+            "port": "5432",
+            "schema": "public"
+        },
+        "dev": {
+            "database": "pgsql",
+            "dbname": "postgres",
+            "user": "postgres",
+            "password": "postgres",
+            "host": "192.168.1.22",
+            "port": "5432",
+            "schema": "public"
+        },
+        "autokit": {
+            "database": "pgsql",
+            "dbname": "nemaapau2",
+            "user": "nemapau",
+            "password": "nemaapau",
+            "host": "192.168.1.22",
+            "port": "5432",
+            "schema": "autokit",
+            "hash": "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"
+        }
+    },
+    "ldap": {
+        "server": "ldap://192.168.12.1",
+        "user": "admin nemaapau",
+        "password": "nemaapau@2231",
+        "base_dn": "OU=nemaapau,DC=nemaapau,DC=adv,DC=br"
+    },
+    "require_email": true,
+    "email": {
+        "host": "smtp.nemaapau.com",
+        "port": 587,
+        "secure": true,
+        "user": "centralnemaapau@nemaapau.adv.br",
+        "password": "nemaapau@2210"
+    }
+
+}

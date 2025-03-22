@@ -1,0 +1,602 @@
+from models.db import SessionLocal
+from sqlalchemy import or_
+from sqlalchemy.sql.sqltypes import String, Text
+from sqlalchemy.orm import sessionmaker
+
+class QueryChain:
+    """
+    Permite encadear operações na query antes de executá-la.
+    
+    Métodos de encadeamento:
+      - join(target, onclause=None): Realiza join (inner join).
+      - innerJoin(target, onclause=None): Igual ao join.
+      - leftJoin(target, onclause=None): Realiza left outer join.
+      - rightJoin(target, onclause=None): Não implementado.
+      - groupBy(*criteria): Aplica agrupamento.
+      - orderBy(*criteria): Ordena os resultados.
+          Se os critérios forem strings, devem ser passados em pares
+          (nome_da_coluna, 'asc' ou 'desc'). Exemplo: .orderBy('id', 'desc')
+      - isTrue(column): Adiciona filtro para que a(s) coluna(s) seja(m) True.
+      - isFalse(column): Adiciona filtro para que a(s) coluna(s) seja(m) False.
+      - empty(column): Filtra registros onde o valor da coluna é vazio ("") ou nulo (None).
+      - notEmpty(column): Filtra registros onde o valor da coluna não é vazio nem nulo.
+      - limit(limit_value): Define o limite de registros.
+      - offset(offset_value): Define o deslocamento da consulta.
+    
+    Métodos de execução:
+      - toList(): Executa a consulta e retorna a lista de resultados.
+      - toDict(): Executa a consulta e retorna os resultados como lista de dicionários.
+      - first(): Executa a consulta e retorna o primeiro resultado.
+      - firstToDict(): Executa a consulta e retorna o primeiro resultado como dicionário.
+    """
+    def __init__(self, query, session, model):
+        self.query = query
+        self.session = session
+        self.model = model
+        # Se .select() não for chamado, fica None. Se for chamado, vira uma lista de colunas.
+        self._selected_columns = None
+        
+    
+    
+    def select(self, *columns):
+        """
+        Pode ser usado com joins para selecionar colunas de múltiplas tabelas.
+        Exemplo:
+        .select(Modelo.id, Modelo.nome, OutraTabela.coluna)
+        .select('id', 'nome')
+        """
+        selected_columns = []
+        column_names = []
+
+        for col in columns:
+            if isinstance(col, str):
+                # Coluna referindo-se ao modelo principal
+                if hasattr(self.model, col):
+                    selected_columns.append(getattr(self.model, col))
+                    column_names.append(col)
+                else:
+                    raise AttributeError(f"A coluna '{col}' não existe no modelo {self.model.__name__}")
+            else:
+                # Se for passado um atributo de outro modelo (usado em joins)
+                selected_columns.append(col)
+                # Tenta usar col.key como "nome" no dicionário final, ou fallback em str(col)
+                if hasattr(col, 'key') and col.key:
+                    column_names.append(col.key)
+                else:
+                    column_names.append(str(col))
+
+        if not selected_columns:
+            raise ValueError("O método select() requer pelo menos uma coluna válida.")
+
+        self.query = self.query.with_entities(*selected_columns)
+        self._selected_columns = column_names  # para uso no toDict
+        return self
+
+    
+    
+    def where(self, *args):
+        """
+        Adiciona uma condição WHERE à query.
+        
+        Se passados 2 argumentos, interpreta como (campo, valor) com operador '='.
+        Se passados 3 argumentos, interpreta como (campo, operador, valor).
+        
+        Exemplo:
+        .where('bot_controle_id', bot_controle['id'])
+        .where('nome_bot', 'like', '%valor%')
+        """
+        if len(args) == 2:
+            condition = args  # ('campo', valor)
+        elif len(args) == 3:
+            condition = args  # ('campo', operador, valor)
+        else:
+            raise ValueError("O método where espera 2 ou 3 argumentos.")
+        filters = self.model.build_filters([condition])
+        self.query = self.query.filter(*filters)
+        return self
+
+    def whereIn(self, column, values):
+        """
+        Filtra registros onde o valor da coluna está contido na lista de valores.
+        
+        Exemplo:
+        .whereIn('id', [1,2,3])
+        """
+        if not hasattr(self.model, column):
+            raise AttributeError(f"{self.model.__name__} não possui a coluna '{column}'")
+        self.query = self.query.filter(getattr(self.model, column).in_(values))
+        return self
+
+    def whereNotIn(self, column, values):
+        """
+        Filtra registros onde o valor da coluna NÃO está contido na lista de valores.
+        
+        Exemplo:
+        .whereNotIn('id', [1,2,3])
+        """
+        if not hasattr(self.model, column):
+            raise AttributeError(f"{self.model.__name__} não possui a coluna '{column}'")
+        self.query = self.query.filter(~getattr(self.model, column).in_(values))
+        return self
+
+
+    # Métodos de encadeamento
+    def join(self, target, onclause=None):
+        self.query = self.query.join(target, onclause=onclause)
+        return self
+
+    def innerJoin(self, target, onclause=None):
+        return self.join(target, onclause=onclause)
+
+    def leftJoin(self, target, onclause=None):
+        self.query = self.query.outerjoin(target, onclause=onclause)
+        return self
+
+    def rightJoin(self, target, onclause=None):
+        raise NotImplementedError("Right join não implementado.")
+
+    def groupBy(self, *criteria):
+        self.query = self.query.group_by(*criteria)
+        return self
+    
+    def count(self):
+        """
+        Executa a consulta e retorna a quantidade de registros encontrados.
+        """
+        try:
+            quantidade = self.query.count()
+        finally:
+            self.session.close()
+        return quantidade
+    
+    
+    # Métodos de ordenação
+    def orderBy(self, *criteria):
+        """
+        Ordena os resultados da query.
+        Se os critérios forem strings, devem ser passados em pares (coluna, direção).
+        Exemplo:
+          .orderBy('id', 'desc')
+          .orderBy(Modelo.nome.asc())
+        """
+        if all(isinstance(crit, str) for crit in criteria):
+            new_criteria = []
+            i = 0
+            while i < len(criteria):
+                col_name = criteria[i]
+                direction = criteria[i+1] if i+1 < len(criteria) else 'asc'
+                column = getattr(self.model, col_name)
+                if direction.lower() == 'desc':
+                    new_criteria.append(column.desc())
+                else:
+                    new_criteria.append(column.asc())
+                i += 2
+            self.query = self.query.order_by(*new_criteria)
+        else:
+            self.query = self.query.order_by(*criteria)
+        return self
+
+    def isTrue(self, column):
+        """
+        Adiciona filtro para que a(s) coluna(s) seja(m) True.
+        
+        Parâmetro:
+          column (str ou lista): Nome da coluna ou lista de nomes.
+        Exemplo:
+          .isTrue('ativo')
+          .isTrue(['ativo', 'confirmado'])
+        """
+        if isinstance(column, list):
+            for col in column:
+                self.query = self.query.filter(getattr(self.model, col) == True)
+        else:
+            self.query = self.query.filter(getattr(self.model, column) == True)
+        return self
+
+    def isFalse(self, column):
+        """
+        Adiciona filtro para que a(s) coluna(s) seja(m) False.
+        
+        Parâmetro:
+          column (str ou lista): Nome da coluna ou lista de nomes.
+        Exemplo:
+          .isFalse('ativo')
+          .isFalse(['ativo', 'confirmado'])
+        """
+        if isinstance(column, list):
+            for col in column:
+                self.query = self.query.filter(getattr(self.model, col) == False)
+        else:
+            self.query = self.query.filter(getattr(self.model, column) == False)
+        return self
+
+    def empty(self, column):
+        """
+        Filtra registros onde o valor da coluna é vazio ("") ou nulo (None).
+        
+        Parâmetro:
+          column (str ou lista): Nome da coluna ou lista de nomes.
+        Exemplo:
+          .empty('encerrado_em')
+        """
+        if isinstance(column, list):
+            for col in column:
+                self.query = self.query.filter(
+                    or_(getattr(self.model, col) == "", getattr(self.model, col) == None)
+                )
+        else:
+            self.query = self.query.filter(
+                or_(getattr(self.model, column) == "", getattr(self.model, column) == None)
+            )
+        return self
+
+    def notEmpty(self, column):
+        """
+        Filtra registros onde o valor da coluna não é vazio nem nulo.
+        
+        Parâmetro:
+          column (str ou lista): Nome da coluna ou lista de nomes.
+        Exemplo:
+          .notEmpty('nome')
+        """
+        if isinstance(column, list):
+            for col in column:
+                self.query = self.query.filter(getattr(self.model, col) != "").filter(getattr(self.model, col) != None)
+        else:
+            self.query = self.query.filter(getattr(self.model, column) != "").filter(getattr(self.model, column) != None)
+        return self
+
+
+    def emptyOrNull(self, column):
+        """
+        Filtra registros onde o valor da coluna é vazio ("" - para colunas de texto)
+        ou nulo (NULL). Se a coluna não for de texto, aplica apenas o teste de NULL.
+        
+        Parâmetro:
+        column (str ou lista): Nome da coluna ou lista de nomes.
+        
+        Exemplo:
+        .emptyOrNull('encerrado_em')
+        """
+        def build_condition(col_obj):
+            # Se a coluna for do tipo String ou Text, verifica se é "" ou NULL.
+            if isinstance(col_obj.type, (String, Text)):
+                return or_(col_obj == "", col_obj == None)
+            else:
+                # Para outros tipos, somente NULL faz sentido.
+                return col_obj == None
+
+        if isinstance(column, list):
+            for col in column:
+                col_obj = getattr(self.model, col)
+                self.query = self.query.filter(build_condition(col_obj))
+        else:
+            col_obj = getattr(self.model, column)
+            self.query = self.query.filter(build_condition(col_obj))
+        return self
+
+
+    def limit(self, limit_value):
+        self.query = self.query.limit(limit_value)
+        return self
+
+    def offset(self, offset_value):
+        self.query = self.query.offset(offset_value)
+        return self
+
+    # Métodos de execução
+    def toList(self):
+        """
+        Executa a consulta e retorna a lista de resultados.
+        """
+        try:
+            results = self.query.all()
+        finally:
+            self.session.close()
+        return results
+
+    def toDict(self):
+        """
+        Executa a consulta e retorna:
+          - Se NENHUMA coluna foi passada a select(), retorna [obj.to_dict(), ...].
+          - Se houve select('colA', 'colB'...), retorna uma lista de dicionários
+            montados com base nessas colunas selecionadas.
+        """
+        rows = self.toList()
+
+        # Caso não tenha sido chamado select(), assumimos que cada row é instância do model
+        if not self._selected_columns:
+            return [item.to_dict() for item in rows]
+
+        # Se houve select(...), então cada 'item' de rows é basicamente uma tupla
+        # se várias colunas, ou um valor "simples" se 1 coluna.
+        resultado = []
+        num_cols = len(self._selected_columns)
+
+        for item in rows:
+            # Se a query retorna só 1 coluna, 'item' não é tupla, é um valor
+            if num_cols == 1:
+                col_name = self._selected_columns[0]
+                d = {col_name: item}
+            else:
+                # Várias colunas => 'item' é uma tupla
+                d = {}
+                for i, col_name in enumerate(self._selected_columns):
+                    d[col_name] = item[i]
+            resultado.append(d)
+
+        return resultado
+
+    def first(self):
+        """
+        Executa a consulta e retorna o primeiro resultado.
+        """
+        try:
+            result = self.query.first()
+        finally:
+            self.session.close()
+        return result
+
+    def firstToDict(self):
+        """
+        Executa a consulta e retorna o primeiro resultado como dicionário.
+        """
+        result = self.first()
+        return result.to_dict() if result else None
+
+
+class CRUDMixin:
+    """
+    Mixin que provê operações CRUD e métodos básicos de filtragem para os models.
+    
+    Métodos de execução:
+      - all(where, or_where): Retorna um QueryChain para encadeamento.
+      - get(where, or_where): Retorna o primeiro registro que satisfaça os filtros como dicionário.
+      - rawSql(sql_string, params): Executa uma query SQL bruta.
+      - insert(**kwargs): Insere um registro.
+      - create(records): Insere registros em massa.
+      - update(**kwargs): Atualiza o registro.
+      - delete(): Remove o registro.
+    """
+    @classmethod
+    def build_filters(cls, conditions):
+        """
+        Constrói uma lista de filtros a partir de condições.
+        Cada condição pode ser:
+          - (campo, valor)        => operador '='
+          - (campo, operador, valor)
+        
+        Exemplo:
+          build_filters([('nome', 'like', '%Silva%'), ('idade', '>=', 18)])
+        """
+        filters = []
+        for cond in conditions:
+            if not isinstance(cond, tuple):
+                raise ValueError("Cada condição deve ser uma tupla")
+            if len(cond) == 2:
+                field, value = cond
+                op = '='
+            elif len(cond) == 3:
+                field, op, value = cond
+            else:
+                raise ValueError("A condição deve ter 2 ou 3 elementos")
+            if not hasattr(cls, field):
+                raise AttributeError(f"{cls.__name__} não possui a coluna '{field}'")
+            column = getattr(cls, field)
+            if op == '=':
+                filters.append(column == value)
+            elif op == '!=':
+                filters.append(column != value)
+            elif op == '>':
+                filters.append(column > value)
+            elif op == '>=':
+                filters.append(column >= value)
+            elif op == '<':
+                filters.append(column < value)
+            elif op == '<=':
+                filters.append(column <= value)
+            elif op.lower() == 'like':
+                filters.append(column.like(value))
+            else:
+                raise ValueError(f"Operador não suportado: {op}")
+        return filters
+
+    @classmethod
+    def query(cls, where=None, or_where=None):
+        """
+        Prepara a query com os filtros aplicados e retorna (query, session).
+        """
+        session = SessionLocal()
+        query = session.query(cls)
+        if where:
+            if isinstance(where, tuple):
+                where = [where]
+            filters = cls.build_filters(where)
+            query = query.filter(*filters)
+        if or_where:
+            if isinstance(or_where, tuple):
+                or_where = [or_where]
+            or_filters = cls.build_filters(or_where)
+            query = query.filter(or_(*or_filters))
+        return query, session
+
+    def to_dict(self):
+        """
+        Converte a instância do model em um dicionário.
+        """
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @classmethod
+    def all(cls, where=None, or_where=None):
+        """
+        Retorna um QueryChain para encadeamento de operações.
+        Exemplo:
+          resultado = Modelo.all().orderBy('id', 'desc').isTrue('ativo').empty('encerrado_em').limit(10).toDict()
+        """
+        query, session = cls.query(where, or_where)
+        return QueryChain(query, session, cls)
+
+    @classmethod
+    def get(cls, where=None, or_where=None):
+        """
+        Retorna o primeiro registro que satisfaça os filtros, como dicionário.
+        Exemplo:
+          registro = Modelo.get(where=("email", "=", "alice@example.com"))
+        """
+        query, session = cls.query(where, or_where)
+        try:
+            result = query.first()
+        finally:
+            session.close()
+        return result.to_dict() if result else None
+
+    @classmethod
+    def rawSql(cls, sql_string, params=None, db_key=None):
+        """
+        Executa uma query SQL bruta e retorna os resultados.
+        
+        Parâmetros:
+        - sql_string: a consulta SQL (deve ser envolvida com text() se for uma string literal).
+        - params: (opcional) dicionário de parâmetros para a consulta.
+        - db_key: (opcional) chave do banco de dados a ser utilizado (ex.: 'autokit').
+                    Se não for informado, usa o engine padrão.
+                    
+        Exemplo:
+        resultados = Modelo.rawSql(sql, params, db_key='autokit')
+        """
+        if db_key:
+            # Importa a função get_engine do seu db.py para obter o engine desejado
+            from models.db import get_engine
+            engine = get_engine(db_key)
+            Session = sessionmaker(bind=engine)
+            session = Session()
+        else:
+            from models.db import SessionLocal
+            session = SessionLocal()
+        try:
+            result = session.execute(sql_string, params)
+            data = result.fetchall()
+        finally:
+            session.close()
+        return data
+
+    @classmethod
+    def insert(cls, **kwargs):
+        """
+        Insere um registro no banco de dados.
+        Exemplo:
+          novo = Modelo.insert(nome="Alice")
+        """
+        session = SessionLocal()
+        try:
+            instance = cls(**kwargs)
+            session.add(instance)
+            session.commit()
+            session.refresh(instance)
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+        return instance
+
+    @classmethod
+    def create(cls, records):
+        """
+        Insere registros em massa.
+        Exemplo:
+          resultado = Modelo.create([{"nome": "Alice"}, {"nome": "Bob"}])
+        """
+        session = SessionLocal()
+        try:
+            instances = [cls(**data) for data in records]
+            session.add_all(instances)
+            session.commit()
+            for instance in instances:
+                session.refresh(instance)
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+        return [instance.to_dict() for instance in instances]
+
+    def update(self, data=None, **kwargs):
+        """
+        Atualiza o registro atual com os valores fornecidos.
+        
+        Pode receber:
+        - Um dicionário: update(data={"campo": valor, ...})
+        - Uma lista de tuplas: update(data=[("campo", valor), ...])
+        - Argumentos nomeados: update(campo=valor, ...)
+        - Ou qualquer combinação dos anteriores.
+        
+        Exemplo:
+        registro.update(data={"nome": "Novo Nome"}, email="novo@email")
+        """
+        # Combina os dados passados via parâmetro e os argumentos nomeados
+        update_data = {}
+        if data is not None:
+            if isinstance(data, dict):
+                update_data.update(data)
+            elif isinstance(data, list):
+                # Assume que cada elemento é uma tupla ou lista de dois itens
+                for item in data:
+                    if isinstance(item, (tuple, list)) and len(item) == 2:
+                        update_data[item[0]] = item[1]
+                    else:
+                        raise ValueError("Cada item da lista deve ser uma tupla ou lista com 2 elementos")
+            else:
+                raise ValueError("O parâmetro 'data' deve ser um dicionário ou uma lista de tuplas")
+        
+        # Atualiza com os argumentos nomeados, se houver
+        update_data.update(kwargs)
+        
+        session = SessionLocal()
+        try:
+            for key, value in update_data.items():
+                setattr(self, key, value)
+            instance = session.merge(self)
+            session.commit()
+            session.refresh(instance)
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+        return instance
+
+
+    def delete(self):
+        """
+        Remove o registro atual do banco de dados.
+        Exemplo:
+          registro.delete()
+        """
+        session = SessionLocal()
+        try:
+            session.delete(self)
+            session.commit()
+        except Exception as e:
+            session.rollback()
+            raise e
+        finally:
+            session.close()
+
+    
+    @classmethod
+    def findById(cls, id_value):
+        """
+        Busca um registro pelo seu ID e o retorna como dicionário.
+        Retorna None se nenhum registro for encontrado.
+        
+        Exemplo:
+          registro = Modelo.findById(1)
+        """
+        session = SessionLocal()
+        try:
+            # Utiliza session.get() para buscar pela chave primária.
+            instance = session.get(cls, id_value)
+        finally:
+            session.close()
+        return instance #.to_dict() if instance else None
