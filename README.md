@@ -77,7 +77,7 @@ pip install sqlalchemy psycopg2-binary
 2. Rode o gerador passando o prefixo das tabelas:
 
 ```bash
-python generate_models.py tbl_bb
+python generate_models.py tbl_
 ```
 
 Isso criará os arquivos dentro do diretório `models/`. Cada model terá:
@@ -86,8 +86,8 @@ Isso criará os arquivos dentro do diretório `models/`. Cada model terá:
 
 Exemplo de model gerado:
 ```python
-class TblBbBotsControle(Base, CRUDMixin):
-    __tablename__ = 'tbl_bb_bots_controle'
+class TblBotsControle(Base, CRUDMixin):
+    __tablename__ = 'tbl_bots_control'
     __table_args__ = {'schema': 'public'}
 
     id = Column(Integer, primary_key=True)
@@ -194,11 +194,11 @@ Estes métodos executam a query e retornam os resultados:
 
 ### Exemplo completo com JOIN, filtro e colunas nomeadas:
 ```python
-from models.tbl_bb_bot_registros_primeira_sentenca import TblBbBotRegistros1Sentenca
+from models.tbl_bot_registros_primeira_sentenca import TblBotRegistros1Sentenca
 
-resultado = TblBbBotRegistros1Sentenca.all()\
-    .join(TblBbBotsControle, TblBbBotsControle.id == TblBbBotRegistros1Sentenca.bot_controle_id)\
-    .select('id', 'sentenca', TblBbBotsControle.nome.label('nome_bot'))\
+resultado = TblBotRegistros1Sentenca.all()\
+    .join(TblBotsControle, TblBotsControle.id == TblBotRegistros1Sentenca.bot_control_id)\
+    .select('id', 'sentenca', TblBotsControle.nome.label('nome_bot'))\
     .where('sentenca', 'like', '%despacho%')\
     .notEmpty('sentenca')\
     .orderBy('id', 'desc')\
@@ -227,8 +227,8 @@ resultado = TblBbBotRegistros1Sentenca.all()\
 Você pode executar comandos SQL diretamente:
 
 ```python
-sql = "SELECT id, nome FROM public.tbl_bb_bots_controle WHERE ativo = true"
-resultado = TblBbBotsControle.rawSql(sql)
+sql = "SELECT id, nome FROM public.tbl_bots_control WHERE ativo = true"
+resultado = TblBotsControle.rawSql(sql)
 
 for linha in resultado:
     print(linha)

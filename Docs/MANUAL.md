@@ -142,7 +142,7 @@ O resultado será algo como:
 ```
 models/
 ├── tbl_bot_registros_primeira_sentenca.py
-├── tbl_bots_controle.py
+├── tbl_bots_control.py
 ```
 
 Cada arquivo contém uma classe declarada corretamente, pronta para uso.
@@ -156,8 +156,8 @@ from sqlalchemy import Column, Integer, String, Boolean
 from .db import Base
 from .crud import CRUDMixin
 
-class TblBbBotsControle(Base, CRUDMixin):
-    __tablename__ = 'tbl_bots_controle'
+class TblBotsControle(Base, CRUDMixin):
+    __tablename__ = 'tbl_bots_control'
     __table_args__ = {'schema': 'public'}
 
     id = Column(Integer, primary_key=True)
