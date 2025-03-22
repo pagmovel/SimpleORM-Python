@@ -4,7 +4,7 @@ Este projeto fornece uma estrutura ORM reutilizável com operações CRUD e filt
 
 ---
 
-## 📁 Estrutura dos Arquivos
+##  Estrutura dos Arquivos
 
 | Arquivo              | Função                                                                 |
 |----------------------|------------------------------------------------------------------------|
@@ -16,7 +16,7 @@ Este projeto fornece uma estrutura ORM reutilizável com operações CRUD e filt
 
 ---
 
-## 🔧 Requisitos
+##  Requisitos
 
 - Python 3.9+
 - SQLAlchemy
@@ -28,7 +28,7 @@ pip install sqlalchemy psycopg2-binary
 
 ---
 
-## ⚙️ Configuração do Ambiente
+##  Configuração do Ambiente
 
 1. Abra o arquivo `config.json` e configure os dados do banco:
 
@@ -71,7 +71,7 @@ pip install sqlalchemy psycopg2-binary
 
 ---
 
-## 🛠️ Gerando os Models Automaticamente
+##  Gerando os Models Automaticamente
 
 1. Certifique-se de que o banco e tabelas existem.
 2. Rode o gerador passando o prefixo das tabelas:
@@ -97,7 +97,7 @@ class TblBbBotsControle(Base, CRUDMixin):
 
 ---
 
-## 🧱 Criando as Tabelas no Banco
+##  Criando as Tabelas no Banco
 
 Após gerar os models, execute:
 
@@ -109,7 +109,7 @@ Esse script importa os models e executa `Base.metadata.create_all()`.
 
 ---
 
-## 🧩 Entendendo a Estrutura dos Models
+##  Entendendo a Estrutura dos Models
 
 Todo model precisa:
 - Herdar de `Base` e `CRUDMixin`
@@ -131,7 +131,7 @@ class Usuario(Base, CRUDMixin):
 
 ---
 
-## 🚀 Usando o CRUDMixin na Prática
+##  Usando o CRUDMixin na Prática
 
 ### Métodos de Acesso Rápido
 
@@ -167,7 +167,7 @@ class Usuario(Base, CRUDMixin):
 
 ---
 
-## 🧠 Métodos de Execução (QueryChain)
+##  Métodos de Execução (QueryChain)
 
 Estes métodos executam a query e retornam os resultados:
 
@@ -190,7 +190,7 @@ Estes métodos executam a query e retornam os resultados:
 
 ---
 
-## 🔁 Encadeando Consultas com `QueryChain`
+##  Encadeando Consultas com `QueryChain`
 
 ### Exemplo completo com JOIN, filtro e colunas nomeadas:
 ```python
@@ -222,7 +222,7 @@ resultado = TblBbBotRegistros1Sentenca.all()\
 
 ---
 
-## 📜 Executando SQL Bruto
+##  Executando SQL Bruto
 
 Você pode executar comandos SQL diretamente:
 
@@ -243,9 +243,9 @@ res = Usuario.rawSql(sql, params)
 
 ---
 
-## 📚 Exemplos Avançados
+##  Exemplos Avançados
 
-### 🔎 Filtros combinados com múltiplas regras
+###  Filtros combinados com múltiplas regras
 ```python
 res = Usuario.all()\
     .whereIn('id', [1, 2, 3])\
@@ -254,7 +254,7 @@ res = Usuario.all()\
     .toDict()
 ```
 
-### 🧠 Atualizar com lista de tuplas
+###  Atualizar com lista de tuplas
 ```python
 usuario.update(data=[("nome", "Novo"), ("ativo", True)])
 ```
@@ -270,7 +270,7 @@ Usuario.create(dados)
 
 ---
 
-## ⚠️ Observações Importantes
+##  Observações Importantes
 
 - Sempre chame um método de execução (`.toDict()`, `.first()`, etc.) para rodar a consulta.
 - `select()` aceita strings (nomes das colunas do model atual) ou objetos (`Model.coluna`).
@@ -280,7 +280,7 @@ Usuario.create(dados)
 
 ---
 
-## 👨‍💻 Autor
+##  Autor
 
 Desenvolvido por Marcos Ronaldo.
 
