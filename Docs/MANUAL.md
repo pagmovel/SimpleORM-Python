@@ -133,16 +133,16 @@ Tudo isso é extraído diretamente da estrutura do banco de dados.
 A ideia é que você possa gerar apenas os models que começam com um determinado prefixo (por exemplo, `tbl_`, `app_`, `sys_`, etc.):
 
 ```bash
-python generate_models.py tbl_bb
+python generate_models.py tbl_
 ```
 
-Esse comando gera apenas os arquivos dos modelos cujos nomes de tabela começam com `tbl_bb`.
+Esse comando gera apenas os arquivos dos modelos cujos nomes de tabela começam com `tbl_`.
 
 O resultado será algo como:
 ```
 models/
-├── tbl_bb_bot_registros_primeira_sentenca.py
-├── tbl_bb_bots_controle.py
+├── tbl_bot_registros_primeira_sentenca.py
+├── tbl_bots_controle.py
 ```
 
 Cada arquivo contém uma classe declarada corretamente, pronta para uso.
@@ -157,7 +157,7 @@ from .db import Base
 from .crud import CRUDMixin
 
 class TblBbBotsControle(Base, CRUDMixin):
-    __tablename__ = 'tbl_bb_bots_controle'
+    __tablename__ = 'tbl_bots_controle'
     __table_args__ = {'schema': 'public'}
 
     id = Column(Integer, primary_key=True)
