@@ -290,5 +290,5 @@ Para dúvidas, consulte as docstrings em `crud.py`, especialmente:
 
 Você encontrará instruções detalhadas, exemplos e explicações de cada método.
 
-Também existe um manual na pasta Docs, bem mais extenso que este README.
+Também existe um manual na pasta documents, bem mais extenso que este README.
 
