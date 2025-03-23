@@ -797,24 +797,7 @@ Use sempre sessões curtas e encapsuladas em rotas para evitar problemas de conc
 
 ---
 
-### 8.4. Arquitetura futura: sugestões de evolução
 
-A estrutura atual funciona muito bem em projetos médios. Mas, conforme o sistema cresce, é saudável planejar algumas melhorias:
-
-#### Sugestões práticas:
-
-- Separar domínio em módulos (ex: `usuario/`, `produto/`, `financeiro/`)
-- Implementar validação de dados com Pydantic (ou Marshmallow)
-- Adicionar versionamento de migrations com Alembic
-- Criar uma interface de repositório desacoplada do ORM
-- Configurar logs SQL de performance em produção
-
-#### E por que não?
-- Incluir suporte nativo a cache Redis no `QueryChain`
-- Criar filtros automáticos a partir de query params
-- Integrar com fila de eventos para registrar alterações
-
----
 
 Ao longo deste manual, você viu como uma estrutura bem desenhada com SQLAlchemy pode ir muito além do básico. Agora você tem em mãos não apenas uma biblioteca — mas uma base sólida, expressiva e expansível para qualquer aplicação profissional.
 
