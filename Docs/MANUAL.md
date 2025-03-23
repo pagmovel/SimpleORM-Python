@@ -6,7 +6,7 @@
 - [Capítulo 1 – Entendendo a Arquitetura do Projeto](#capítulo-1--entendendo-a-arquitetura-do-projeto)
 - [Capítulo 2 – Preparando o Ambiente: do caos ao controle](#capítulo-2--preparando-o-ambiente-do-caos-ao-controle)
 - [Capítulo 3 – Gerando os Models automaticamente: menos tédio, mais produtividade](#capítulo-3--gerando-os-models-automaticamente-menos-tédio-mais-produtividade)
-- [Capítulo 4 – O Poder do CRUDMixin: criando, lendo, atualizando e deletando com graça](#capítulo-4--o-poder-do-crudmixin-criando-lendo-atualizando-e-deletando-com-graça)
+- [Capítulo 4 – O Poder do CRUDMixin, o motor silencioso por trás da mágica: criando, lendo, atualizando e deletando com graça](#capítulo-4--o-poder-do-crudmixin-o-motor-silencioso-por-trás-da-mágica-criando-lendo-atualizando-e-deletando-com-graça)
 - [Capítulo 5 – QueryChain: a arte de consultar como um mestre zen](#capítulo-5--querychain-a-arte-de-consultar-como-um-mestre-zen)
 - [Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real](#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)
 - [Capítulo 7 – Boas Práticas, Armadilhas Comuns e Como Evitar Tragédias Anunciadas](#capítulo-7--boas-práticas-armadilhas-comuns-e-como-evitar-tragédias-anunciadas)
@@ -180,7 +180,8 @@ No próximo capítulo, você aprenderá a criar as tabelas no banco com um únic
 
 ---
 
-## Capítulo 4 – CRUDMixin: o motor silencioso por trás da mágica
+## Capítulo 4 – O Poder do CRUDMixin, o motor silencioso por trás da mágica: criando, lendo, atualizando e deletando com graça
+
 
 Chegamos a um dos pontos mais poderosos — e muitas vezes subestimados — dessa arquitetura: o `CRUDMixin`. Este mixin é responsável por fornecer todos os métodos essenciais para operar sobre os dados. A beleza disso? Você escreve pouquíssimo código e ganha uma capacidade enorme de controle sobre as operações de banco.
 
