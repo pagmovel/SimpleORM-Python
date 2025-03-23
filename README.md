@@ -194,10 +194,10 @@ Estes métodos executam a query e retornam os resultados:
 
 ### Exemplo completo com JOIN, filtro e colunas nomeadas:
 ```python
-from models.tbl_bot_registros_primeira_sentenca import TblBotRegistros1Sentenca
+from models.tbl_bot_registros import TblBotRegistros
 
-resultado = TblBotRegistros1Sentenca.all()\
-    .join(TblBotsControle, TblBotsControle.id == TblBotRegistros1Sentenca.bot_control_id)\
+resultado = TblBotRegistros.all()\
+    .join(TblBotsControle, TblBotsControle.id == TblBotRegistros.bot_control_id)\
     .select('id', 'sentenca', TblBotsControle.nome.label('nome_bot'))\
     .where('sentenca', 'like', '%despacho%')\
     .notEmpty('sentenca')\

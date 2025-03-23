@@ -141,7 +141,7 @@ Esse comando gera apenas os arquivos dos modelos cujos nomes de tabela começam 
 O resultado será algo como:
 ```
 models/
-├── tbl_bot_registros_primeira_sentenca.py
+├── tbl_bot_registros.py
 ├── tbl_bots_control.py
 ```
 
