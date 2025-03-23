@@ -14,13 +14,13 @@ with open(config_path, 'r') as f:
 
 def get_engine():
     """
-    Lê config["ambiente"] (ex.: 'dev', 'prod') e monta a conexão com base nisso.
+    Lê config["environment"] (ex.: 'dev', 'prod') e monta a conexão com base nisso.
     """
-    ambiente = config.get("ambiente", "dev")  # Pega "ambiente" ou usa 'dev' como padrão
-    db_params = config['database'].get(ambiente)
+    environment = config.get("environment", "dev")  # Pega "environment" ou usa 'dev' como padrão
+    db_params = config['database'].get(environment)
     
     if not db_params:
-        raise ValueError(f"Ambiente '{ambiente}' não encontrado em config['database'].")
+        raise ValueError(f"Environment '{environment}' não encontrado em config['database'].")
     
     if db_params['database'].lower() == 'pgsql':
         connection_string = (
@@ -35,12 +35,12 @@ def get_engine():
 
 def get_schema():
     """
-    Retorna o schema definido no config.json para o ambiente atual.
+    Retorna o schema definido no config.json para o environment atual.
     """
-    ambiente = config.get("ambiente", "dev")
-    db_params = config['database'].get(ambiente)
+    environment = config.get("environment", "dev")
+    db_params = config['database'].get(environment)
     if not db_params:
-        raise ValueError(f"Ambiente '{ambiente}' não encontrado em config['database'].")
+        raise ValueError(f"Environment '{environment}' não encontrado em config['database'].")
     return db_params.get('schema', None)
 
 # Inicializa engine e SessionLocal para uso geral

@@ -10,7 +10,7 @@ Este projeto fornece uma estrutura ORM reutilizável com operações CRUD e filt
 |----------------------|------------------------------------------------------------------------|
 | `crud.py`            | Implementa a lógica de CRUD e filtros encadeáveis (`CRUDMixin`, `QueryChain`) |
 | `db.py`              | Gerencia conexão com o banco e instância da `Session`                  |
-| `config.json`        | Configurações de ambiente e banco (dev, prod, etc.)                    |
+| `config.json`        | Configurações de environment e banco (dev, prod, etc.)                    |
 | `create_tables.py`   | Cria as tabelas a partir dos models gerados                            |
 | `generate_models.py` | Reflete o banco de dados e gera os arquivos Python dos models          |
 
@@ -28,13 +28,13 @@ pip install sqlalchemy psycopg2-binary
 
 ---
 
-##  Configuração do Ambiente
+##  Configuração do Ambiente (environment)
 
 1. Abra o arquivo `config.json` e configure os dados do banco:
 
 ```json
 {
-  "ambiente": "dev",
+  "environment": "dev",
   "database": {
     "dev": {
       "database": "pgsql",
@@ -67,7 +67,7 @@ pip install sqlalchemy psycopg2-binary
 }
 ```
 
-2. O valor em "ambiente" define qual conexão será usada por padrão.
+2. O valor em "environment" define qual conexão será usada por padrão.
 
 ---
 

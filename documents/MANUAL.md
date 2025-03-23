@@ -84,7 +84,7 @@ Veja um exemplo de entrada de ambiente:
 
 ```json
 {
-  "ambiente": "dev",
+  "environment": "dev",
   "database": {
     "dev": {
       "database": "pgsql",
@@ -100,10 +100,10 @@ Veja um exemplo de entrada de ambiente:
 ```
 
 Alguns pontos importantes:
-- `ambiente`: define qual configuração será carregada.
+- `environment`: define qual configuração será carregada.
 - `database`: agrupa as conexões disponíveis por nome (dev, prod, staging, autokit... você escolhe).
 
-Você pode definir múltiplos ambientes, e mudar entre eles apenas trocando a chave `ambiente`.
+Você pode definir múltiplos ambientes, e mudar entre eles apenas trocando a chave `environment`.
 
 ### 2.3. Conexão com o banco
 

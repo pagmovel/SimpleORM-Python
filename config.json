@@ -1,5 +1,5 @@
 {
-    "ambiente": "dev",
+    "environment": "dev",
     "database": {
         "prod": {
             "database": "pgsql",
