@@ -2,15 +2,71 @@
 
 ## Índice
 
+## Índice Atualizado
+
 - [Introdução](#introdução)
 - [Capítulo 1 – Entendendo a Arquitetura do Projeto](#capítulo-1--entendendo-a-arquitetura-do-projeto)
 - [Capítulo 2 – Preparando o Ambiente: do caos ao controle](#capítulo-2--preparando-o-ambiente-do-caos-ao-controle)
+  - [2.1. Instalação dos pacotes necessários](#21-instalação-dos-pacotes-necessários)
+  - [2.2. Entendendo o `config.json`](#22-entendendo-o-configjson)
+  - [2.3. Conexão com o banco](#23-conexão-com-o-banco)
 - [Capítulo 3 – Gerando os Models automaticamente: menos tédio, mais produtividade](#capítulo-3--gerando-os-models-automaticamente-menos-tédio-mais-produtividade)
+  - [3.1. O que o script `generate_models.py` faz por você?](#31-o-que-o-script-generate_modelspy-faz-por-você)
+  - [3.2. Executando o gerador com um prefixo](#32-executando-o-gerador-com-um-prefixo)
+  - [3.3. Anatomia de um model gerado](#33-anatomia-de-um-model-gerado)
 - [Capítulo 4 – O Poder do CRUDMixin, o motor silencioso por trás da mágica: criando, lendo, atualizando e deletando com graça](#capítulo-4--o-poder-do-crudmixin-o-motor-silencioso-por-trás-da-mágica-criando-lendo-atualizando-e-deletando-com-graça)
+  - [4.1. all(where=None, or_where=None)](#41-allwherenone-or_wherenone)
+  - [4.2. get(where=None, or_where=None)](#42-getwherenone-or_wherenone)
+  - [4.3. insert(**kwargs)](#43-insertkwargs)
+  - [4.4. create(records)](#44-createrecords)
+  - [4.5. update(data=None, **kwargs)](#45-updatedatanone-kwargs)
+  - [4.6. delete()](#46-delete)
+  - [4.7. findById(id)](#47-findbyidid)
+  - [4.8. rawSql(sql_string, params=None, db_key=None)](#48-rawsqlsql_string-paramsnone-db_keynone)
 - [Capítulo 5 – QueryChain: a arte de consultar como um mestre zen](#capítulo-5--querychain-a-arte-de-consultar-como-um-mestre-zen)
-- [Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real](#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)
+  - [5.1. O problema: consultas monolíticas, ilegíveis e inflexíveis](#51-o-problema-consultas-monolíticas-ilegíveis-e-inflexíveis)
+  - [5.2. A solução: QueryChain](#52-a-solução-querychain)
+  - [5.3. Métodos de Encadeamento](#53-métodos-de-encadeamento)
+  - [5.4. Métodos de Execução](#54-métodos-de-execução)
+  - [5.5. Exemplo prático completo](#55-exemplo-prático-completo)
+- [Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real](#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)  
+  - [6.1. Cenário 1 – Consulta condicional com parâmetros dinâmicos](#61-cenário-1--consulta-condicional-com-parâmetros-dinâmicos)
+  - [6.2. Cenário 2 – Gerando relatório com agregações](#62-cenário-2--gerando-relatório-com-agregações)
+  - [6.3. Cenário 3 – API paginada com ordenação dinâmica](#63-cenário-3--api-paginada-com-ordenação-dinâmica)
+  - [6.4. Cenário 4 – Join com múltiplas tabelas e múltiplas colunas](#64-cenário-4--join-com-múltiplas-tabelas-e-múltiplas-colunas)
+  - [6.5. Cenário 5 – Atualização condicional de registros](#65-cenário-5--atualização-condicional-de-registros)
+
 - [Capítulo 7 – Boas Práticas, Armadilhas Comuns e Como Evitar Tragédias Anunciadas](#capítulo-7--boas-práticas-armadilhas-comuns-e-como-evitar-tragédias-anunciadas)
+  - [7.1. Fechando sessões corretamente](#71-fechando-sessões-corretamente)
+  - [7.2. Use `.select()` com sabedoria](#72-use-select-com-sabedoria)
+  - [7.3. Evite `.toList()` se você precisa de dicionários](#73-evite-tolist-se-você-precisa-de-dicionários)
+  - [7.4. Cuidado com operadores mal utilizados](#74-cuidado-com-operadores-mal-utilizados)
+  - [7.5. Joins sem `label()` podem quebrar sua API](#75-joins-sem-label-podem-quebrar-sua-api)
+  - [7.6. Atualizações em massa exigem cuidado](#76-atualizações-em-massa-exigem-cuidado)
+  - [7.7. Documente os models gerados automaticamente](#77-documente-os-models-gerados-automaticamente)
+  - [7.8. Use `rawSql()` com moderação (mas sem medo)](#78-use-rawsql-com-moderação-mas-sem-medo)
 - [Capítulo 8 – Testes, Extensões e o Futuro: adaptando sua arquitetura para crescer com você](#capítulo-8--testes-extensões-e-o-futuro-adaptando-sua-arquitetura-para-crescer-com-você)
+  - [8.1. Testes automatizados com SQLAlchemy](#81-testes-automatizados-com-sqlalchemy)
+  - [8.2. Como estender o CRUDMixin](#82-como-estender-o-crudmixin)
+  - [8.3. Integração com frameworks web](#83-integração-com-frameworks-web)
+- [Capítulo 9 – Validação Inteligente com Elegância: erros que explicam, não confundem](#capítulo-9--validação-inteligente-com-elegância-erros-que-explicam-não-confundem)
+  - [9.1. O que é o `validate_or_fail`](#91-o-que-é-o-validate_or_fail)
+  - [9.2. Declarando regras no seu model](#92-declarando-regras-no-seu-model)
+  - [9.3. Validação em Ação: exemplos reais](#93-validação-em-ação-exemplos-reais)
+  - [9.4. Regras avançadas: min, max, in, regex](#94-regras-avançadas-min-max-in-regex)
+  - [9.5. Capturando erros manualmente (útil em APIs)](#95-capturando-erros-manualmente-útil-em-apis)
+  - [9.6. Validação em massa com `.create()`](#96-validação-em-massa-com-create)
+  - [9.7. Validar dados sem salvar: uso direto do `validate_or_fail`](#97-validar-dados-sem-salvar-uso-direto-do-validate_or_fail)
+  - [9.8. Dicas finais](#98-dicas-finais)
+- [Capítulo 10 – Protegendo e Traduzindo Campos com Elegância: fillable, guarded e aliases](#capítulo-10--protegendo-e-traduzindo-campos-com-elegância-fillable-guarded-e-aliases)
+  - [10.1. O que é `fillable`](#101-o-que-é-fillable)
+  - [10.2. E o `guarded`](#102-e-o-guarded)
+  - [10.3. Quando usar `fillable` vs `guarded`](#103-quando-usar-fillable-vs-guarded)
+  - [10.4. `aliases`: traduzindo campos amigavelmente](#104-aliases-traduzindo-campos-amigavelmente)
+  - [10.5. Aplicação combinada: tudo junto](#105-aplicação-combinada-tudo-junto)
+  - [10.6. Dica bônus: compatível com `.update()` também](#106-dica-bônus-compatível-com-update-também)
+  - [10.7. Por que isso importa?](#107-por-que-isso-importa)
+
 
 
 ## Introdução
@@ -822,13 +878,406 @@ def listar():
 #### Cuidado:
 Use sempre sessões curtas e encapsuladas em rotas para evitar problemas de concorrência.
 
+
 ---
 
-A estrutura atual funciona muito bem em projetos médios. Mas, conforme o sistema cresce, é saudável planejar algumas melhorias:
+
+## Capítulo 9 – Validação Inteligente com Elegância: erros que explicam, não confundem
+
+Se você já tentou debugar um formulário que simplesmente “não salva” sem nenhuma mensagem clara, este capítulo é para você.
+
+Agora que você já sabe inserir, atualizar, deletar e consultar com maestria, é hora de elevar a robustez do seu sistema. Vamos adicionar uma camada de proteção aos dados — a validação.
+
+O sistema apresentado aqui já vem com um motor de validação embutido, que você pode ativar com o mínimo de esforço e o máximo de clareza.
+
+---
+
+### 9.1. O que é o `validate_or_fail`?
+
+A função `validate_or_fail` (presente em `validator.py`) é uma validadora genérica que aplica um conjunto de regras simples a qualquer dicionário de dados.
+
+Ela suporta:
+
+- Campos obrigatórios
+- Validação de tipo (`string`, `integer`, `email`, etc.)
+- Regras de tamanho (`min`, `max`)
+- Validação com regex
+- Verificação por valores permitidos (`in`, `not_in`)
+
+Se algum erro for encontrado, uma exceção `ValidationError` é lançada, contendo um dicionário explicando exatamente o que deu errado — campo por campo.
+
+---
+
+### 9.2. Declarando regras no seu model
+
+Vamos usar como exemplo o model `User`, que já vem com regras básicas:
+
+```python
+class User(Base, CRUDMixin):
+    ...
+
+    @classmethod
+    def rules(cls):
+        return {
+            'name': ['required'],
+            'email': ['required', 'email'],
+            'password': ['required'],
+        }
+```
+
+Essas regras dizem:
+
+- `name` é obrigatório  
+- `email` é obrigatório e deve ter formato válido  
+- `password` é obrigatório
+
+Você pode adicionar quantas regras quiser, e elas serão automaticamente aplicadas ao usar `.insert()`, `.create()` e `.update()`.
+
+---
+
+### 9.3. Validação em Ação: exemplos reais
+
+#### 1. Inserindo um registro com dados inválidos
+
+```python
+User.insert(name="", email="errado", password=None)
+```
+
+Resultado:
+```python
+ValidationError: {
+  'name': ['Este campo é obrigatório.'],
+  'email': ['Formato de e-mail inválido.'],
+  'password': ['Este campo é obrigatório.']
+}
+```
+
+#### 2. Atualizando com segurança
+
+```python
+usuario.update(email="sem-arroba", name="  ")
+```
+
+Retorno esperado:
+```python
+ValidationError: {
+  'name': ['Este campo é obrigatório.'],
+  'email': ['Formato de e-mail inválido.']
+}
+```
+
+---
+
+### 9.4. Regras avançadas: min, max, in, regex
+
+Você pode usar regras mais elaboradas para validar diferentes tipos de dados:
+
+```python
+@classmethod
+def rules(cls):
+    return {
+        'name': ['required', 'min:3', 'max:50'],
+        'email': ['required', 'email'],
+        'idade': ['integer', 'min:18'],
+        'genero': ['in:["M","F","O"]'],
+        'cpf': ['regex:^\\d{11}$']
+    }
+```
+
+Essas regras permitem validar:
+
+- Tamanho mínimo/máximo de strings
+- Intervalos de números
+- Conjunto de valores permitidos
+- Formato de campos específicos com expressões regulares
+
+---
+
+### 9.5. Capturando erros manualmente (útil em APIs)
+
+Você pode capturar os erros de validação e transformá-los em mensagens amigáveis em sua aplicação:
+
+```python
+from utils.validator import ValidationError
+
+try:
+    User.insert(name="Ok", email="sem-email", password="")
+except ValidationError as e:
+    print(e.errors)
+```
+
+---
+
+### 9.6. Validação em massa com `.create()`
+
+Ao usar `.create()`, cada item da lista será validado individualmente:
+
+```python
+dados = [
+    {"name": "Alice", "email": "alice@teste.com", "password": "abc"},
+    {"name": "", "email": "bob@", "password": None}
+]
+
+User.create(dados)
+```
+
+Resultado:
+```
+[VALIDAÇÃO] Erro no registro 2: {
+  'name': ['Este campo é obrigatório.'],
+  'email': ['Formato de e-mail inválido.'],
+  'password': ['Este campo é obrigatório.']
+}
+```
+
+---
+
+
+### 9.7. Validar dados sem salvar: uso direto do `validate_or_fail`
+
+Nem sempre você quer inserir ou atualizar imediatamente. Às vezes, você só precisa verificar se os dados **seriam válidos** — por exemplo:
+
+- antes de mostrar uma mensagem de erro no formulário
+- antes de chamar uma API externa
+- em um `dry-run` de importação em massa
+- durante validação em endpoints que ainda não persistem dados
+
+Para isso, você pode usar diretamente a função `validate_or_fail`, passando os dados e as regras:
+
+#### Exemplo 1 – Validação simples (sem salvar)
+
+```python
+from utils.validator import validate_or_fail
+
+dados = {
+    "name": "",
+    "email": "errado",
+    "password": "123"
+}
+
+# Validando com as regras do próprio model
+validate_or_fail(dados, User.rules())
+```
+
+Isso lançará:
+
+```python
+ValidationError: {
+  'name': ['Este campo é obrigatório.'],
+  'email': ['Formato de e-mail inválido.']
+}
+```
+
+---
+
+#### Exemplo 2 – Validação dinâmica em tempo de execução
+
+Você pode até validar campos parciais:
+
+```python
+parcial = {"email": "teste@", "idade": 16}
+
+rules = {
+    "email": ["required", "email"],
+    "idade": ["integer", "min:18"]
+}
+
+validate_or_fail(parcial, rules)
+```
+
+Resultado:
+
+```python
+ValidationError: {
+  'email': ['Formato de e-mail inválido.'],
+  'idade': ['Valor mínimo permitido é 18.']
+}
+```
+
+---
+
+#### Exemplo 3 – Usando com `try`/`except` em APIs ou testes
+
+```python
+try:
+    validate_or_fail({"email": "joao@", "cpf": "123"}, {
+        "email": ["required", "email"],
+        "cpf": ["regex:^\\d{11}$"]
+    })
+except ValidationError as e:
+    print("Erros:", e.errors)
+```
+
+---
+
+### Quando isso é útil?
+
+- Pré-validação antes de salvar no banco
+- Validação de etapas intermediárias em formulários
+- Conferência de arquivos CSV, JSON ou payloads externos
+- Criação de endpoints tipo `POST /validar` que só analisam os dados
+
+---
+
+Validar sem salvar é como fazer um test-drive antes de comprar: você ganha confiança no que está recebendo — e evita levar dor de cabeça pra casa (ou pro banco de dados).
+
+---
+
+
+### 9.8. Dicas finais
+
+- Toda validação é feita **antes** de persistir no banco
+- Regras vivem no próprio model, perto dos dados
+- Toda exceção é **descritiva**, nunca genérica
+- Você pode customizar os tipos e mensagens, se necessário
+
+---
+
+Com isso, você fecha mais uma camada de robustez no seu sistema. Seu ORM agora não apenas consulta e salva dados — ele **protege** seus dados com validações claras, consistentes e automatizadas.
+
+
+---
+
+## Capítulo 10 – Protegendo e Traduzindo Campos com Elegância: fillable, guarded e aliases
+
+Você chegou até aqui dominando inserções, consultas, validações e atualizações. Mas e se alguém tentar injetar dados indevidos no seu model? Ou se o frontend envia "nome" enquanto seu banco espera "name"? É aqui que entram os guardiões silenciosos: `fillable`, `guarded` e `aliases`.
+
+Este capítulo mostra como essas ferramentas protegem seu modelo contra atualizações indesejadas e ainda facilitam a comunicação com interfaces externas.
+
+---
+
+### 10.1. O que é `fillable`?
+
+O atributo `fillable` define uma lista **explícita** de campos que podem ser preenchidos via `.insert()`, `.create()` ou `.update()`.
+
+É uma forma de **whitelist** — você declara o que pode entrar, o resto é ignorado.
+
+#### Exemplo:
+
+```python
+class User(Base, CRUDMixin):
+    ...
+    fillable = ['name', 'email', 'password']
+```
+
+#### Uso:
+
+```python
+User.insert(name="Ana", email="ana@x.com", password="123", role="admin")
+```
+
+Se `role` **não** estiver em `fillable`, será automaticamente ignorado — mesmo que esteja presente no dicionário de entrada.
+
+---
+
+### 10.2. E o `guarded`?
+
+Enquanto `fillable` diz o que pode entrar, `guarded` faz o oposto: lista campos que **não podem** ser preenchidos.
+
+Você pode usar um ou outro (não os dois ao mesmo tempo).
+
+#### Exemplo:
+
+```python
+class Produto(Base, CRUDMixin):
+    ...
+    guarded = ['id', 'criado_em']
+```
+
+Qualquer tentativa de preencher esses campos será ignorada silenciosamente.
+
+---
+
+### 10.3. Quando usar `fillable` vs `guarded`
+
+| Situação                              | Recomendado |
+|--------------------------------------|-------------|
+| Poucos campos confiáveis             | `fillable`  |
+| Muitos campos, poucos proibidos      | `guarded`   |
+| Modelos expostos em APIs públicas    | `fillable`  |
+| Modelos internos, usados só por devs | Pode omitir |
+
+---
+
+### 10.4. `aliases`: traduzindo campos amigavelmente
+
+Às vezes seu model usa nomes técnicos como `name`, `created_at`, mas você quer permitir que a API ou o admin use nomes mais humanos, como `nome` ou `criadoEm`.
+
+A propriedade `aliases` mapeia esses nomes alternativos para os reais.
+
+#### Exemplo:
+
+```python
+class User(Base, CRUDMixin):
+    ...
+    aliases = {
+        'nome': 'name',
+        'criadoEm': 'created_at'
+    }
+```
+
+#### Uso:
+
+```python
+User.insert(nome="João", email="joao@email.com", password="123")
+```
+
+Internamente, `nome` será convertido para `name`.
+
+---
+
+### 10.5. Aplicação combinada: tudo junto
+
+```python
+class User(Base, CRUDMixin):
+    ...
+    fillable = ['name', 'email', 'password']
+    aliases = {'nome': 'name'}
+```
+
+Agora você pode chamar:
+
+```python
+User.insert(nome="Lia", email="lia@teste.com", password="abc", ativo=True)
+```
+
+E o campo `ativo` será ignorado (por não estar em `fillable`), e `nome` será corretamente traduzido para `name`.
+
+---
+
+### 10.6. Dica bônus: compatível com `.update()` também
+
+Tudo isso funciona tanto para `.insert()` quanto `.create()` e `.update()`.
+
+```python
+usuario.update(nome="Novo Nome", email="atualizado@a.com")
+```
+
+Se os campos estiverem em `fillable` e mapeados em `aliases`, eles passam!
+
+---
+
+### 10.7. Por que isso importa?
+
+- Evita sobrescritas acidentais de colunas sensíveis
+- Protege o modelo contra entradas inesperadas
+- Permite APIs multilíngues e painéis mais amigáveis
+- Deixa o código mais claro e previsível
+
+---
+
+Usar `fillable`, `guarded` e `aliases` é como configurar uma porta de entrada com controle de acesso e recepcionista bilíngue. Elegante, seguro e acolhedor.
+
+Com isso, seus models estão não apenas mais seguros — mas também mais compreensíveis por quem fala a língua dos dados… ou a língua dos usuários.
+
+
+---
 
 #### Sugestões práticas:
 
-- Separar domínio em módulos (ex: `usuario/`, `produto/`, `financeiro/`)
+A estrutura atual destas classes funcionam muito bem em projetos médios. Mas, conforme o sistema cresce, é saudável planejar algumas melhorias:
+
+Separe os domínio em módulos para facilitar a manutenção dos seus projetos (ex: `usuario/`, `produto/`, `financeiro/`)
 
 
 ---

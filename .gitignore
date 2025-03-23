@@ -1,0 +1,39 @@
+# Ambiente virtual
+venv/
+.venv/
+
+# Bytecode e arquivos temporários do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Arquivos temporários de editor
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Arquivos de banco SQLite (se usados para testes)
+*.sqlite3
+*.db
+
+# Arquivos de testes
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+test-results/
+
+# Build e distribuição
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/

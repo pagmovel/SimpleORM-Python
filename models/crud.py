@@ -2,6 +2,8 @@ from models.db import SessionLocal
 from sqlalchemy import or_
 from sqlalchemy.sql.sqltypes import String, Text
 from sqlalchemy.orm import sessionmaker
+from utils.validator import validate_or_fail
+
 
 class QueryChain:
     """
@@ -359,6 +361,24 @@ class CRUDMixin:
       - delete(): Remove o registro.
     """
     @classmethod
+    def _filter_fillable(cls, data: dict):
+        if hasattr(cls, "fillable"):
+            return {k: v for k, v in data.items() if k in cls.fillable}
+        elif hasattr(cls, "guarded"):
+            return {k: v for k, v in data.items() if k not in cls.guarded}
+        return data
+
+    @classmethod
+    def _apply_aliases(cls, data: dict):
+        """
+        Converte apelidos amigáveis (como 'nome') para os nomes reais ('name') com base em cls.aliases.
+        """
+        if hasattr(cls, "aliases"):
+            return {cls.aliases.get(k, k): v for k, v in data.items()}
+        return data
+
+    
+    @classmethod
     def build_filters(cls, conditions):
         """
         Constrói uma lista de filtros a partir de condições.
@@ -488,13 +508,22 @@ class CRUDMixin:
           novo = Modelo.insert(nome="Alice")
         """
         session = SessionLocal()
+        clean_data = cls._apply_aliases(kwargs)
+        clean_data = cls._filter_fillable(clean_data)
+
+        # Aplica validação automaticamente, se houver rules()
+        if hasattr(cls, "rules"):
+            from utils.validator import validate_or_fail
+            validate_or_fail(clean_data, cls.rules())
+
         try:
-            instance = cls(**kwargs)
+            instance = cls(**clean_data)
             session.add(instance)
             session.commit()
             session.refresh(instance)
         except Exception as e:
             session.rollback()
+            print(f"[ERRO BD] Falha ao inserir {cls.__name__}: {str(e).splitlines()[0]}")
             raise e
         finally:
             session.close()
@@ -503,23 +532,43 @@ class CRUDMixin:
     @classmethod
     def create(cls, records):
         """
-        Insere registros em massa.
+        Insere registros em massa com validação automática.
         Exemplo:
-          resultado = Modelo.create([{"nome": "Alice"}, {"nome": "Bob"}])
+        resultado = Modelo.create([{"nome": "Alice"}, {"nome": "Bob"}])
         """
         session = SessionLocal()
         try:
-            instances = [cls(**data) for data in records]
+            instances = []
+            for index, data in enumerate(records):
+                # Aplica aliases e limpa com fillable
+                clean_data = cls._filter_fillable(cls._apply_aliases(data))
+
+                # Validação com feedback claro
+                if hasattr(cls, "rules"):
+                    from utils.validator import validate_or_fail, ValidationError
+                    try:
+                        validate_or_fail(clean_data, cls.rules())
+                    except ValidationError as ve:
+                        print(f"[VALIDAÇÃO] Erro no registro {index + 1}: {ve.errors}")
+                        raise ve
+
+                instances.append(cls(**clean_data))
+
             session.add_all(instances)
             session.commit()
             for instance in instances:
                 session.refresh(instance)
+
         except Exception as e:
             session.rollback()
+            print(f"[ERRO BD] Falha ao criar múltiplos {cls.__name__}: {str(e).splitlines()[0]}")
             raise e
         finally:
             session.close()
+
         return [instance.to_dict() for instance in instances]
+
+    
 
     def update(self, data=None, **kwargs):
         """
@@ -530,17 +579,16 @@ class CRUDMixin:
         - Uma lista de tuplas: update(data=[("campo", valor), ...])
         - Argumentos nomeados: update(campo=valor, ...)
         - Ou qualquer combinação dos anteriores.
-        
+
         Exemplo:
         registro.update(data={"nome": "Novo Nome"}, email="novo@email")
         """
-        # Combina os dados passados via parâmetro e os argumentos nomeados
         update_data = {}
+
         if data is not None:
             if isinstance(data, dict):
                 update_data.update(data)
             elif isinstance(data, list):
-                # Assume que cada elemento é uma tupla ou lista de dois itens
                 for item in data:
                     if isinstance(item, (tuple, list)) and len(item) == 2:
                         update_data[item[0]] = item[1]
@@ -548,10 +596,21 @@ class CRUDMixin:
                         raise ValueError("Cada item da lista deve ser uma tupla ou lista com 2 elementos")
             else:
                 raise ValueError("O parâmetro 'data' deve ser um dicionário ou uma lista de tuplas")
-        
-        # Atualiza com os argumentos nomeados, se houver
+
         update_data.update(kwargs)
-        
+
+        update_data = self.__class__._apply_aliases(update_data)
+        update_data = self.__class__._filter_fillable(update_data)
+
+        #  Validação automática baseada nas regras do modelo
+        if hasattr(self.__class__, "rules"):
+            from utils.validator import validate_or_fail, ValidationError
+            try:
+                validate_or_fail(update_data, self.__class__.rules())
+            except ValidationError as ve:
+                print(f"[VALIDAÇÃO] Falha na atualização: {ve.errors}")
+                raise ve
+
         session = SessionLocal()
         try:
             for key, value in update_data.items():
@@ -561,10 +620,13 @@ class CRUDMixin:
             session.refresh(instance)
         except Exception as e:
             session.rollback()
+            print(f"[ERRO BD] Falha ao atualizar {self.__class__.__name__}: {str(e).splitlines()[0]}")
             raise e
         finally:
             session.close()
+
         return instance
+
 
 
     def delete(self):

@@ -270,6 +270,28 @@ Usuario.create(dados)
 
 ---
 
+## Atualizações Recentes
+
+### ✅ Validação Automática com Regras (`rules()`)
+- Agora é possível definir regras de validação diretamente no model com o método `rules()`.
+- As regras são aplicadas automaticamente nos métodos `insert`, `create` e `update`.
+- Regras disponíveis:
+  - `required`, `string`, `integer`, `float`, `boolean`, `email`, `datetime`
+  - `min:<n>`, `max:<n>`, `regex:<exp>`, `in:[...]`, `not_in:[...]`
+
+### ✅ Campos Preenchíveis (`fillable`)
+- Defina no model quais campos podem ser inseridos ou atualizados com segurança.
+
+### ✅ Aliases de Campos
+- Atributo `aliases` permite usar nomes alternativos (ex: `nome` → `name`).
+- Facilita para novos devs e melhora legibilidade no código.
+
+### ✅ Validação com Feedback Amigável
+- Os erros de validação são claros, curtos e informativos.
+- Exemplo: `{'email': ['Formato de e-mail inválido.']}`
+
+---
+
 ##  Observações Importantes
 
 - Sempre chame um método de execução (`.toDict()`, `.first()`, etc.) para rodar a consulta.
