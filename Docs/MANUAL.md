@@ -6,11 +6,11 @@
 - [Capítulo 1 – Entendendo a Arquitetura do Projeto](#capítulo-1--entendendo-a-arquitetura-do-projeto)
 - [Capítulo 2 – Preparando o Ambiente: do caos ao controle](#capítulo-2--preparando-o-ambiente-do-caos-ao-controle)
 - [Capítulo 3 – Gerando os Models automaticamente: menos tédio, mais produtividade](#capítulo-3--gerando-os-models-automaticamente-menos-tédio-mais-produtividade)
-- [Capítulo 4 – O Poder do CRUDMixin: criando, lendo, atualizando e deletando com graça](#capítulo-4--crudmixin-o-motor-silencioso-por-trás-da-mágica)(#capítulo-4--o-poder-do-crudmixin-criando-lendo-atualizando-e-deletando-com-graça)
-- [Capítulo 5 – QueryChain: a arte de consultar como um mestre zen](#capítulo-5--querychain-a-arte-de-consultar-como-um-mestre-zen)(#capítulo-5--querychain-a-arte-de-consultar-como-um-mestre-zen)
-- [Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real](#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)(#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)
-- [Capítulo 7 – Boas Práticas, Armadilhas Comuns e Como Evitar Tragédias Anunciadas](#capítulo-7--boas-práticas-armadilhas-comuns-e-como-evitar-tragédias-anunciadas)(#capítulo-7--boas-práticas-armadilhas-comuns-e-como-evitar-tragédias-anunciadas)
-- [Capítulo 8 – Testes, Extensões e o Futuro: adaptando sua arquitetura para crescer com você](#capítulo-8--testes-extensões-e-o-futuro-adaptando-sua-arquitetura-para-crescer-com-você)(#capítulo-8--testes-extensões-e-o-futuro-adaptando-sua-arquitetura-para-crescer-com-você)
+- [Capítulo 4 – O Poder do CRUDMixin: criando, lendo, atualizando e deletando com graça](#capítulo-4--o-poder-do-crudmixin-criando-lendo-atualizando-e-deletando-com-graça)
+- [Capítulo 5 – QueryChain: a arte de consultar como um mestre zen](#capítulo-5--querychain-a-arte-de-consultar-como-um-mestre-zen)
+- [Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real](#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)
+- [Capítulo 7 – Boas Práticas, Armadilhas Comuns e Como Evitar Tragédias Anunciadas](#capítulo-7--boas-práticas-armadilhas-comuns-e-como-evitar-tragédias-anunciadas)
+- [Capítulo 8 – Testes, Extensões e o Futuro: adaptando sua arquitetura para crescer com você](#capítulo-8--testes-extensões-e-o-futuro-adaptando-sua-arquitetura-para-crescer-com-você)
 
 
 ## Introdução
