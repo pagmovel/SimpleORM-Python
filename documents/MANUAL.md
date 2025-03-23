@@ -797,7 +797,14 @@ Use sempre sessões curtas e encapsuladas em rotas para evitar problemas de conc
 
 ---
 
+A estrutura atual funciona muito bem em projetos médios. Mas, conforme o sistema cresce, é saudável planejar algumas melhorias:
 
+#### Sugestões práticas:
+
+- Separar domínio em módulos (ex: `usuario/`, `produto/`, `financeiro/`)
+
+
+---
 
 Ao longo deste manual, você viu como uma estrutura bem desenhada com SQLAlchemy pode ir muito além do básico. Agora você tem em mãos não apenas uma biblioteca — mas uma base sólida, expressiva e expansível para qualquer aplicação profissional.
 
