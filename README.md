@@ -259,7 +259,7 @@ res = Usuario.all()\
 usuario.update(data=[("nome", "Novo"), ("ativo", True)])
 ```
 
-### 📥 Inserção em massa
+###  Inserção em massa
 ```python
 dados = [
     {"nome": "Ana", "email": "a@a.com"},
