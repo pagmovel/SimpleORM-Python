@@ -87,13 +87,40 @@ Veja um exemplo de entrada de ambiente:
   "environment": "dev",
   "database": {
     "dev": {
-      "database": "pgsql",
-      "dbname": "meubanco",
-      "user": "meuusuario",
-      "password": "minhasenha",
-      "host": "127.0.0.1",
-      "port": "5432",
-      "schema": "public"
+        "database": "pgsql",
+        "dbname": "meubanco",
+        "user": "meuusuario",
+        "password": "minhasenha",
+        "host": "127.0.0.1",
+        "port": "5432",
+        "schema": "public"
+    },
+    "prod": {
+        "database": "pgsql",
+        "dbname": "postgres",
+        "user": "postgres",
+        "password": "postgres",
+        "host": "192.168.1.21",
+        "port": "5432",
+        "schema": "public"
+    },
+    "staging": {
+        "database": "pgsql",
+        "dbname": "postgres",
+        "user": "postgres",
+        "password": "postgres",
+        "host": "192.168.1.22",
+        "port": "5432",
+        "schema": "public"
+    },
+    "autokit": {
+        "database": "pgsql",
+        "dbname": "postgres",
+        "user": "postgres",
+        "password": "postgres",
+        "host": "192.168.1.23",
+        "port": "5432",
+        "schema": "public"
     }
   }
 }
