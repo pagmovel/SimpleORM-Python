@@ -1,4 +1,4 @@
-from models.db import SessionLocal
+from .db import SessionLocal
 from sqlalchemy import or_
 from sqlalchemy.sql.sqltypes import String, Text
 from sqlalchemy.orm import sessionmaker
