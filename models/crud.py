@@ -2,7 +2,7 @@ from .db import SessionLocal
 from sqlalchemy import or_
 from sqlalchemy.sql.sqltypes import String, Text
 from sqlalchemy.orm import sessionmaker
-from utils.validator import validate_or_fail
+from ..utils.validator import validate_or_fail
 
 
 class QueryChain:
