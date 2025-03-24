@@ -702,7 +702,11 @@ class CRUDMixin:
         try:
             # Supondo que 'where' seja uma tupla, ex: ('id', 110)
             filter_column = getattr(cls, where[0])
-            query = session.query(cls).filter(filter_column == where[1])
+            if isinstance(where[1], (list, tuple)):
+                query = session.query(cls).filter(filter_column.in_(where[1]))
+            else:
+                query = session.query(cls).filter(filter_column == where[1])
+            # query = session.query(cls).filter(filter_column == where[1])
             updated_rows = query.update(update_data, synchronize_session=False)
             session.commit()
 
