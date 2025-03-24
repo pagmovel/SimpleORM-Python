@@ -2,6 +2,10 @@
 venv/
 .venv/
 
+models/**/tbl_*
+models/**/tarefas*
+models/**/__pycache__/
+
 # Bytecode e arquivos temporários do Python
 __pycache__/
 *.py[cod]
