@@ -6,8 +6,24 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-config_path = os.path.join(BASE_DIR, 'config.json')
+def find_config_file():
+    current_dir = os.path.dirname(__file__)
+    # Verifica em 1 e 2 níveis acima
+    for levels in range(1, 3):
+        directory = os.path.abspath(os.path.join(current_dir, *[".."] * levels))
+        config_file = os.path.join(directory, 'config.json')
+        if os.path.isfile(config_file):
+            return config_file
+    return None
+
+config_path = find_config_file()
+if config_path:
+    print(f"Arquivo encontrado em: {config_path}")
+else:
+    raise FileNotFoundError("config.json não foi encontrado em até 2 níveis acima.")
+
+# BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+# config_path = os.path.join(BASE_DIR, 'config.json')
 
 with open(config_path, 'r') as f:
     config = json.load(f)
