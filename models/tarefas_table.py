@@ -1,12 +1,10 @@
 from sqlalchemy import Column, Integer, String, Date, DateTime, Float, text
-from .db import Base
-from .crud import CRUDMixin
+from models.db import Base
+from models.crud import CRUDMixin
 
 class TarefasTable(Base, CRUDMixin):
     __tablename__ = 'tarefas_table'
     __table_args__ = {'schema': 'autokit'}
-    
-    # fillable = ['situacao','cor','responsavel','data_cadastro','carteira','data_situacao','uf_juizo','data_integracao','prazo_final','pasta_id','pasta','subpasta','data_lancamento','prazo_interno','solicitante','evento','duracao','publico','origem_informacao','modelo_tarefa','data_inicio_contagem','dias_ate_prazo_final','lancamento_conferido','terceiro','data_protocolo','unidade','importado','usuario_atualizacao','data_atualizacao','juizo','numero_processo','numero_processo_unificado','tipo_evento','conferencia_situacao','prazo_final_hora','local_tarefa','classificacao','motivo_situacao_ultima_solicitacao','tag_controle','sentenca_ou_acordao','valor_alcada','valor_acordo','valor_contraproposta','valor_dano_moral','valor_dano_material','valor_sentenca','motivo_situacao_ultima_aprovacao']
 
     id = Column(Integer, primary_key=True, nullable=False)
     situacao = Column(String(15), nullable=True)
@@ -56,8 +54,3 @@ class TarefasTable(Base, CRUDMixin):
     valor_dano_material = Column(Float, nullable=True)
     valor_sentenca = Column(Float, nullable=True)
     motivo_situacao_ultima_aprovacao = Column(String(200), nullable=True)
-
-
-
-
-
