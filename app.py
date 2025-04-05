@@ -1,7 +1,7 @@
 # from models.usuario import Usuario
 from utils.validator import ValidationError
 from sqlalchemy import text
-from models.users import User
+from .models.users import User
 
 
 

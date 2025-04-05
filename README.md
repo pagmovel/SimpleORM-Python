@@ -4,19 +4,19 @@ Este projeto fornece uma estrutura ORM reutilizável com operações CRUD e filt
 
 ---
 
-##  Estrutura dos Arquivos
+## Estrutura dos Arquivos
 
-| Arquivo              | Função                                                                 |
-|----------------------|------------------------------------------------------------------------|
+| Arquivo              | Função                                                                        |
+| -------------------- | ----------------------------------------------------------------------------- |
 | `crud.py`            | Implementa a lógica de CRUD e filtros encadeáveis (`CRUDMixin`, `QueryChain`) |
-| `db.py`              | Gerencia conexão com o banco e instância da `Session`                  |
-| `config.json`        | Configurações de environment e banco (dev, prod, etc.)                    |
-| `create_tables.py`   | Cria as tabelas a partir dos models gerados                            |
-| `generate_models.py` | Reflete o banco de dados e gera os arquivos Python dos models          |
+| `db.py`              | Gerencia conexão com o banco e instância da `Session`                         |
+| `config.json`        | Configurações de environment e banco (dev, prod, etc.)                        |
+| `create_tables.py`   | Cria as tabelas a partir dos models gerados                                   |
+| `generate_models.py` | Reflete o banco de dados e gera os arquivos Python dos models                 |
 
 ---
 
-##  Requisitos
+## Requisitos
 
 - Python 3.9+
 - SQLAlchemy
@@ -28,7 +28,7 @@ pip install sqlalchemy psycopg2-binary
 
 ---
 
-##  Configuração do Ambiente (environment)
+## Configuração do Ambiente (environment)
 
 1. Abra o arquivo `config.json` e configure os dados do banco:
 
@@ -71,7 +71,7 @@ pip install sqlalchemy psycopg2-binary
 
 ---
 
-##  Gerando os Models Automaticamente
+## Gerando os Models Automaticamente
 
 1. Certifique-se de que o banco e tabelas existem.
 2. Rode o gerador passando o prefixo das tabelas:
@@ -81,10 +81,12 @@ python generate_models.py tbl_
 ```
 
 Isso criará os arquivos dentro do diretório `models/`. Cada model terá:
+
 - Classe herdando de `Base` e `CRUDMixin`
 - Colunas refletidas automaticamente
 
 Exemplo de model gerado:
+
 ```python
 class TblBotsControle(Base, CRUDMixin):
     __tablename__ = 'tbl_bots_control'
@@ -97,7 +99,7 @@ class TblBotsControle(Base, CRUDMixin):
 
 ---
 
-##  Criando as Tabelas no Banco
+## Criando as Tabelas no Banco
 
 Após gerar os models, execute:
 
@@ -109,14 +111,16 @@ Esse script importa os models e executa `Base.metadata.create_all()`.
 
 ---
 
-##  Entendendo a Estrutura dos Models
+## Entendendo a Estrutura dos Models
 
 Todo model precisa:
+
 - Herdar de `Base` e `CRUDMixin`
 - Declarar `__tablename__` e, opcionalmente, `__table_args__`
 - Utilizar colunas do SQLAlchemy normalmente
 
 Exemplo:
+
 ```python
 from sqlalchemy import Column, Integer, String
 from .db import Base
@@ -131,28 +135,33 @@ class Usuario(Base, CRUDMixin):
 
 ---
 
-##  Usando o CRUDMixin na Prática
+## Usando o CRUDMixin na Prática
 
 ### Métodos de Acesso Rápido
 
 #### `Usuario.all(...)`
+
 - Retorna um `QueryChain` que permite encadear filtros e modificadores (ex: ordenação, limite).
 - Pode receber filtros via `where`, `or_where`.
 - Só é executado quando um dos métodos de execução é chamado (ex: `.toDict()`, `.toList()`, `.first()`).
 
 #### `Usuario.get(...)`
+
 - Recebe os mesmos filtros que `all()`.
 - Retorna o primeiro resultado como um `dict`, ou `None`.
 
 #### `Usuario.insert(**kwargs)`
+
 - Cria um novo registro no banco com os valores fornecidos.
 - Retorna a instância criada (objeto do model).
 
 #### `Usuario.create([dicts])`
+
 - Insere vários registros em uma única operação.
 - Retorna uma lista de dicionários com os dados inseridos.
 
 #### `registro.update(...)`
+
 - Atualiza os campos da instância atual. Pode receber:
   - dicionário (`data={}`)
   - lista de tuplas (`data=[(...)]`)
@@ -160,39 +169,47 @@ class Usuario(Base, CRUDMixin):
 - Retorna a instância atualizada.
 
 #### `registro.delete()`
+
 - Remove o registro atual do banco de dados.
 
 #### `Usuario.findById(id)`
+
 - Retorna a instância com a chave primária fornecida.
 
 ---
 
-##  Métodos de Execução (QueryChain)
+## Métodos de Execução (QueryChain)
 
 Estes métodos executam a query e retornam os resultados:
 
 ### `.toDict()`
+
 - Retorna uma lista de dicionários com os dados encontrados.
 - Se `.select(...)` foi usado, retorna apenas as colunas selecionadas.
 - Caso contrário, retorna todos os campos de cada registro.
 
 ### `.toList()`
+
 - Retorna uma lista de objetos (instâncias da classe do model).
 
 ### `.first()`
+
 - Retorna a primeira instância encontrada (objeto).
 
 ### `.firstToDict()`
+
 - Retorna o primeiro resultado como dicionário (ou `None` se não houver resultado).
 
 ### `.count()`
+
 - Retorna o número total de registros encontrados.
 
 ---
 
-##  Encadeando Consultas com `QueryChain`
+## Encadeando Consultas com `QueryChain`
 
 ### Exemplo completo com JOIN, filtro e colunas nomeadas:
+
 ```python
 from models.tbl_bot_registros import TblBotRegistros
 
@@ -209,20 +226,20 @@ resultado = TblBotRegistros.all()\
 
 ### Métodos encadeáveis disponíveis:
 
-| Método         | Descrição |
-|----------------|-----------|
-| `.select(...)` | Define colunas específicas a serem retornadas |
-| `.where(...)` | Filtro com igualdade ou operador customizado |
-| `.whereIn(...)`, `.whereNotIn(...)` | Filtragem por lista de valores |
-| `.isTrue(...)`, `.isFalse(...)` | Filtra campos booleanos |
-| `.empty(...)`, `.notEmpty(...)`, `.emptyOrNull(...)` | Verifica campos vazios/nulos |
-| `.orderBy(...)` | Ordena resultados por colunas |
-| `.groupBy(...)` | Agrupa os resultados |
-| `.limit(...)`, `.offset(...)` | Paginação |
+| Método                                               | Descrição                                     |
+| ---------------------------------------------------- | --------------------------------------------- |
+| `.select(...)`                                       | Define colunas específicas a serem retornadas |
+| `.where(...)`                                        | Filtro com igualdade ou operador customizado  |
+| `.whereIn(...)`, `.whereNotIn(...)`                  | Filtragem por lista de valores                |
+| `.isTrue(...)`, `.isFalse(...)`                      | Filtra campos booleanos                       |
+| `.empty(...)`, `.notEmpty(...)`, `.emptyOrNull(...)` | Verifica campos vazios/nulos                  |
+| `.orderBy(...)`                                      | Ordena resultados por colunas                 |
+| `.groupBy(...)`                                      | Agrupa os resultados                          |
+| `.limit(...)`, `.offset(...)`                        | Paginação                                     |
 
 ---
 
-##  Executando SQL Bruto
+## Executando SQL Bruto
 
 Você pode executar comandos SQL diretamente:
 
@@ -235,6 +252,7 @@ for linha in resultado:
 ```
 
 Com parâmetros nomeados:
+
 ```python
 sql = "SELECT * FROM usuarios WHERE nome LIKE :nome"
 params = {"nome": "%fulano%"}
@@ -243,9 +261,10 @@ res = Usuario.rawSql(sql, params)
 
 ---
 
-##  Exemplos Avançados
+## Exemplos Avançados
 
-###  Filtros combinados com múltiplas regras
+### Filtros combinados com múltiplas regras
+
 ```python
 res = Usuario.all()\
     .whereIn('id', [1, 2, 3])\
@@ -254,12 +273,18 @@ res = Usuario.all()\
     .toDict()
 ```
 
-###  Atualizar com lista de tuplas
+### Atualizar com lista de tuplas
+
 ```python
 usuario.update(data=[("nome", "Novo"), ("ativo", True)])
+
+# Ou
+
+Usuario.updateWhere({"nome": "Novo", "ativo": True},('id',3))
 ```
 
-###  Inserção em massa
+### Inserção em massa
+
 ```python
 dados = [
     {"nome": "Ana", "email": "a@a.com"},
@@ -273,6 +298,7 @@ Usuario.create(dados)
 ## Atualizações Recentes
 
 ### ✅ Validação Automática com Regras (`rules()`)
+
 - Agora é possível definir regras de validação diretamente no model com o método `rules()`.
 - As regras são aplicadas automaticamente nos métodos `insert`, `create` e `update`.
 - Regras disponíveis:
@@ -280,19 +306,22 @@ Usuario.create(dados)
   - `min:<n>`, `max:<n>`, `regex:<exp>`, `in:[...]`, `not_in:[...]`
 
 ### ✅ Campos Preenchíveis (`fillable`)
+
 - Defina no model quais campos podem ser inseridos ou atualizados com segurança.
 
 ### ✅ Aliases de Campos
+
 - Atributo `aliases` permite usar nomes alternativos (ex: `nome` → `name`).
 - Facilita para novos devs e melhora legibilidade no código.
 
 ### ✅ Validação com Feedback Amigável
+
 - Os erros de validação são claros, curtos e informativos.
 - Exemplo: `{'email': ['Formato de e-mail inválido.']}`
 
 ---
 
-##  Observações Importantes
+## Observações Importantes
 
 - Sempre chame um método de execução (`.toDict()`, `.first()`, etc.) para rodar a consulta.
 - `select()` aceita strings (nomes das colunas do model atual) ou objetos (`Model.coluna`).
@@ -302,15 +331,15 @@ Usuario.create(dados)
 
 ---
 
-##  Autor
+## Autor
 
 Desenvolvido por Marcos Ronaldo.
 
 Para dúvidas, consulte as docstrings em `crud.py`, especialmente:
+
 - `CRUDMixin`
 - `QueryChain`
 
 Você encontrará instruções detalhadas, exemplos e explicações de cada método.
 
 Também existe um manual na pasta documents, bem mais extenso que este README.
-

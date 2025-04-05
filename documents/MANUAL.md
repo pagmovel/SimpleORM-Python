@@ -17,9 +17,9 @@
 - [Capítulo 4 – O Poder do CRUDMixin, o motor silencioso por trás da mágica: criando, lendo, atualizando e deletando com graça](#capítulo-4--o-poder-do-crudmixin-o-motor-silencioso-por-trás-da-mágica-criando-lendo-atualizando-e-deletando-com-graça)
   - [4.1. all(where=None, or_where=None)](#41-allwherenone-or_wherenone)
   - [4.2. get(where=None, or_where=None)](#42-getwherenone-or_wherenone)
-  - [4.3. insert(**kwargs)](#43-insertkwargs)
+  - [4.3. insert(\*\*kwargs)](#43-insertkwargs)
   - [4.4. create(records)](#44-createrecords)
-  - [4.5. update(data=None, **kwargs)](#45-updatedatanone-kwargs)
+  - [4.5. update(data=None, \*\*kwargs)](#45-updatedatanone-kwargs)
   - [4.6. delete()](#46-delete)
   - [4.7. findById(id)](#47-findbyidid)
   - [4.8. rawSql(sql_string, params=None, db_key=None)](#48-rawsqlsql_string-paramsnone-db_keynone)
@@ -29,7 +29,8 @@
   - [5.3. Métodos de Encadeamento](#53-métodos-de-encadeamento)
   - [5.4. Métodos de Execução](#54-métodos-de-execução)
   - [5.5. Exemplo prático completo](#55-exemplo-prático-completo)
-- [Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real](#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)  
+- [Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real](#capítulo-6--casos-de-uso-reais-quando-o-banco-de-dados-encontra-a-vida-real)
+
   - [6.1. Cenário 1 – Consulta condicional com parâmetros dinâmicos](#61-cenário-1--consulta-condicional-com-parâmetros-dinâmicos)
   - [6.2. Cenário 2 – Gerando relatório com agregações](#62-cenário-2--gerando-relatório-com-agregações)
   - [6.3. Cenário 3 – API paginada com ordenação dinâmica](#63-cenário-3--api-paginada-com-ordenação-dinâmica)
@@ -66,8 +67,6 @@
   - [10.5. Aplicação combinada: tudo junto](#105-aplicação-combinada-tudo-junto)
   - [10.6. Dica bônus: compatível com `.update()` também](#106-dica-bônus-compatível-com-update-também)
   - [10.7. Por que isso importa?](#107-por-que-isso-importa)
-
-
 
 ## Introdução
 
@@ -127,6 +126,7 @@ pip install sqlalchemy psycopg2-binary
 ```
 
 Esses dois pacotes são indispensáveis:
+
 - `sqlalchemy`: o ORM principal que usamos.
 - `psycopg2-binary`: driver para conectar com bancos PostgreSQL.
 
@@ -143,46 +143,47 @@ Veja um exemplo de entrada de ambiente:
   "environment": "dev",
   "database": {
     "dev": {
-        "database": "pgsql",
-        "dbname": "meubanco",
-        "user": "meuusuario",
-        "password": "minhasenha",
-        "host": "127.0.0.1",
-        "port": "5432",
-        "schema": "public"
+      "database": "pgsql",
+      "dbname": "meubanco",
+      "user": "meuusuario",
+      "password": "minhasenha",
+      "host": "127.0.0.1",
+      "port": "5432",
+      "schema": "public"
     },
     "prod": {
-        "database": "pgsql",
-        "dbname": "postgres",
-        "user": "postgres",
-        "password": "postgres",
-        "host": "192.168.1.21",
-        "port": "5432",
-        "schema": "public"
+      "database": "pgsql",
+      "dbname": "postgres",
+      "user": "postgres",
+      "password": "postgres",
+      "host": "192.168.1.21",
+      "port": "5432",
+      "schema": "public"
     },
     "staging": {
-        "database": "pgsql",
-        "dbname": "postgres",
-        "user": "postgres",
-        "password": "postgres",
-        "host": "192.168.1.22",
-        "port": "5432",
-        "schema": "public"
+      "database": "pgsql",
+      "dbname": "postgres",
+      "user": "postgres",
+      "password": "postgres",
+      "host": "192.168.1.22",
+      "port": "5432",
+      "schema": "public"
     },
     "autokit": {
-        "database": "pgsql",
-        "dbname": "postgres",
-        "user": "postgres",
-        "password": "postgres",
-        "host": "192.168.1.23",
-        "port": "5432",
-        "schema": "public"
+      "database": "pgsql",
+      "dbname": "postgres",
+      "user": "postgres",
+      "password": "postgres",
+      "host": "192.168.1.23",
+      "port": "5432",
+      "schema": "public"
     }
   }
 }
 ```
 
 Alguns pontos importantes:
+
 - `environment`: define qual configuração será carregada.
 - `database`: agrupa as conexões disponíveis por nome (dev, prod, staging, autokit... você escolhe).
 
@@ -203,6 +204,7 @@ Se você já teve que escrever à mão todos os modelos de um banco com 30, 50 o
 ### 3.1. O que o script `generate_models.py` faz por você?
 
 Esse script acessa seu banco de dados, reflete as tabelas e gera um arquivo `.py` para cada tabela, dentro da pasta `models/`. Ele gera:
+
 - A declaração da classe com `Base` e `CRUDMixin`
 - Colunas e tipos automaticamente
 - Chaves primárias e estrangeiras
@@ -222,6 +224,7 @@ python generate_models.py tbl_
 Esse comando gera apenas os arquivos dos modelos cujos nomes de tabela começam com `tbl_`.
 
 O resultado será algo como:
+
 ```
 models/
 ├── tbl_bot_registros.py
@@ -249,6 +252,7 @@ class TblBotsControle(Base, CRUDMixin):
 ```
 
 Explicando:
+
 - `Base` é a base declarativa do SQLAlchemy, herdada por todos os models.
 - `CRUDMixin` traz todos os métodos de acesso ao banco (insert, update, delete, all, get, etc.).
 - `__tablename__` define o nome da tabela no banco.
@@ -259,12 +263,9 @@ Você pode editar livremente os modelos após a geração, inclusive adicionando
 
 No próximo capítulo, você aprenderá a criar as tabelas no banco com um único comando, e entenderá como isso se conecta com os modelos gerados.
 
-
-
 ---
 
 ## Capítulo 4 – O Poder do CRUDMixin, o motor silencioso por trás da mágica: criando, lendo, atualizando e deletando com graça
-
 
 Chegamos a um dos pontos mais poderosos — e muitas vezes subestimados — dessa arquitetura: o `CRUDMixin`. Este mixin é responsável por fornecer todos os métodos essenciais para operar sobre os dados. A beleza disso? Você escreve pouquíssimo código e ganha uma capacidade enorme de controle sobre as operações de banco.
 
@@ -275,13 +276,16 @@ Vamos agora destrinchar cada método deste mixin. E não apenas dizer o que ele 
 Este método é o ponto de entrada para iniciar uma consulta complexa, retornando uma instância de `QueryChain`, que permite encadeamento fluente de filtros, ordenações, joins e outros modificadores.
 
 #### Parâmetros:
+
 - `where`: tupla ou lista de tuplas com filtros a serem aplicados com `AND`
 - `or_where`: tupla ou lista de tuplas com filtros aplicados com `OR`
 
 #### Retorno:
+
 - Um objeto `QueryChain`, que precisa ser finalizado com um método de execução, como `.toList()`, `.toDict()`, `.first()`, etc.
 
 #### Exemplo:
+
 ```python
 usuarios = Usuario.all(where=("ativo", True)).orderBy("id", "desc").limit(10).toDict()
 ```
@@ -291,24 +295,29 @@ usuarios = Usuario.all(where=("ativo", True)).orderBy("id", "desc").limit(10).to
 Retorna o primeiro registro que satisfaz os critérios passados, convertido automaticamente para um dicionário.
 
 #### Retorno:
+
 - Um `dict` com os campos do model ou `None` se nenhum registro for encontrado.
 
 #### Exemplo:
+
 ```python
 admin = Usuario.get(where=("email", "admin@empresa.com"))
 ```
 
-### 4.3. insert(**kwargs)
+### 4.3. insert(\*\*kwargs)
 
 Cria e persiste um novo registro no banco.
 
 #### Parâmetros:
+
 - Argumentos nomeados, correspondendo às colunas da tabela.
 
 #### Retorno:
+
 - A instância do model recém-criada.
 
 #### Exemplo:
+
 ```python
 novo_usuario = Usuario.insert(nome="Fernanda", email="fer@empresa.com", ativo=True)
 ```
@@ -318,12 +327,15 @@ novo_usuario = Usuario.insert(nome="Fernanda", email="fer@empresa.com", ativo=Tr
 Cria múltiplos registros em uma única transação.
 
 #### Parâmetros:
+
 - `records`: uma lista de dicionários, cada um representando um novo registro.
 
 #### Retorno:
+
 - Uma lista de dicionários contendo os dados persistidos.
 
 #### Exemplo:
+
 ```python
 dados = [
     {"nome": "Ana"},
@@ -332,16 +344,18 @@ dados = [
 usuarios = Usuario.create(dados)
 ```
 
-### 4.5. update(data=None, **kwargs)
+### 4.5. update(data=None, \*\*kwargs)
 
 Atualiza os campos da instância atual. Pode receber os dados em múltiplos formatos.
 
 #### Formas válidas:
+
 - `data={"campo": valor}`
 - `data=[("campo", valor)]`
 - `campo=valor` diretamente
 
 #### Exemplo:
+
 ```python
 usuario.update(nome="João da Silva", ativo=False)
 ```
@@ -351,6 +365,7 @@ usuario.update(nome="João da Silva", ativo=False)
 Remove o registro atual do banco. Não há volta, então cuidado com esse botão nuclear.
 
 #### Exemplo:
+
 ```python
 usuario.delete()
 ```
@@ -360,9 +375,11 @@ usuario.delete()
 Busca um registro pela chave primária.
 
 #### Retorno:
+
 - A instância do model, ou `None` se não encontrar
 
 #### Exemplo:
+
 ```python
 usuario = Usuario.findById(42)
 ```
@@ -372,11 +389,13 @@ usuario = Usuario.findById(42)
 Executa SQL puro diretamente no banco. Deve ser usada com cautela, mas é essencial quando você precisa de consultas mais complexas ou fora do escopo do ORM.
 
 #### Parâmetros:
+
 - `sql_string`: string SQL (use parâmetros nomeados para segurança)
 - `params`: dicionário com os valores dos parâmetros
 - `db_key`: opcional, permite selecionar outro banco configurado no `config.json`
 
 #### Exemplo:
+
 ```python
 sql = "SELECT * FROM usuarios WHERE nome ILIKE :nome"
 res = Usuario.rawSql(sql, {"nome": "%jo%"})
@@ -385,10 +404,6 @@ res = Usuario.rawSql(sql, {"nome": "%jo%"})
 ---
 
 No próximo capítulo, vamos nos aprofundar no `QueryChain`, essa maravilha que permite escrever consultas que antes exigiriam várias linhas de SQL, agora com poucas e elegantes instruções Python.
-
-
-
-
 
 ---
 
@@ -412,7 +427,8 @@ Vamos olhar para isso em profundidade, analisando cada método que você pode us
 
 ### 5.3. Métodos de Encadeamento
 
-#### select(*columns)
+#### select(\*columns)
+
 Seleciona colunas específicas para retorno. Se não for usado, retorna todas as colunas do model.
 
 ```python
@@ -420,6 +436,7 @@ usuarios = Usuario.all().select("id", "nome").toDict()
 ```
 
 Você também pode passar colunas de outro model em joins:
+
 ```python
 from models.empresa import Empresa
 res = Usuario.all().join(Empresa, Usuario.empresa_id == Empresa.id)
@@ -428,7 +445,9 @@ res = Usuario.all().join(Empresa, Usuario.empresa_id == Empresa.id)
 ```
 
 #### where(...)
+
 Aplica um filtro `AND`. Suporta dois formatos:
+
 - `("coluna", valor)` => assume igualdade
 - `("coluna", "operador", valor)` => operador explícito (`!=`, `>`, `like`, etc.)
 
@@ -437,57 +456,75 @@ Usuario.all().where("ativo", True).where("idade", ">=", 18)
 ```
 
 #### whereIn(coluna, lista)
+
 Filtra registros com valores dentro de uma lista:
+
 ```python
 Usuario.all().whereIn("id", [1,2,3])
 ```
 
 #### whereNotIn(coluna, lista)
+
 Oposto do anterior:
+
 ```python
 Usuario.all().whereNotIn("perfil", ["admin", "root"])
 ```
 
 #### isTrue(coluna) e isFalse(coluna)
+
 Aplica verificação booleana:
+
 ```python
 Usuario.all().isTrue("ativo")
 Usuario.all().isFalse(["confirmado", "validado"])
 ```
 
 #### empty(coluna) e notEmpty(coluna)
+
 Verifica se os campos estão vazios (nulo ou string vazia):
+
 ```python
 Usuario.all().empty("data_desativacao")
 Usuario.all().notEmpty("nome")
 ```
 
 #### emptyOrNull(coluna)
+
 Versão mais inteligente que trata strings e outros tipos:
+
 ```python
 Usuario.all().emptyOrNull("descricao")
 ```
 
 #### join(model, onclause=None)
+
 Faz inner join:
+
 ```python
 Usuario.all().join(Empresa, Usuario.empresa_id == Empresa.id)
 ```
 
 #### leftJoin(model, onclause=None)
+
 Faz left outer join:
+
 ```python
 Usuario.all().leftJoin(Empresa, Usuario.empresa_id == Empresa.id)
 ```
 
 #### groupBy(...)
+
 Agrupamento por colunas:
+
 ```python
 Usuario.all().groupBy(Usuario.perfil).toList()
 ```
 
 #### orderBy(...)
+
 Aceita duas formas:
+
 - Strings em pares: `("nome", "asc")`
 - Expressões SQLAlchemy: `Model.coluna.desc()`
 
@@ -497,7 +534,9 @@ Usuario.all().orderBy(Usuario.id.desc())
 ```
 
 #### limit(valor) e offset(valor)
+
 Paginação:
+
 ```python
 Usuario.all().limit(10).offset(20)
 ```
@@ -509,7 +548,9 @@ Usuario.all().limit(10).offset(20)
 Estes são os métodos que de fato **executam** a query montada.
 
 #### toList()
+
 Retorna uma lista de objetos (instâncias do model). Ideal para lógica interna.
+
 ```python
 registros = Usuario.all().toList()
 for r in registros:
@@ -517,25 +558,33 @@ for r in registros:
 ```
 
 #### toDict()
+
 Retorna lista de dicionários. Ideal para APIs e serialização.
+
 ```python
 dados = Usuario.all().select("id", "nome").toDict()
 ```
 
 #### first()
+
 Retorna a primeira instância encontrada (ou `None`).
+
 ```python
 u = Usuario.all().where("email", "fulano@email.com").first()
 ```
 
 #### firstToDict()
+
 Mesmo que `first()`, mas converte para dicionário.
+
 ```python
 dados = Usuario.all().where("email", "fulano@email.com").firstToDict()
 ```
 
 #### count()
+
 Executa um `SELECT COUNT(*)` com os filtros aplicados:
+
 ```python
 ativos = Usuario.all().isTrue("ativo").count()
 ```
@@ -561,17 +610,11 @@ Você acabou de construir o equivalente a uma query SQL com `JOIN`, `WHERE`, `OR
 
 No próximo capítulo, vamos entrar em cenários de uso do mundo real, com casos que exigem lógica condicional, múltiplas tabelas e decisões em tempo de execução.
 
-
-
-
-
-
-
 ---
 
 ## Capítulo 6 – Casos de Uso Reais: quando o banco de dados encontra a vida real
 
-Até aqui, exploramos ferramentas. Agora é hora de ver essas ferramentas em ação — como um chef de cozinha que conhece suas facas e panelas, mas quer mesmo é saber como preparar um belo risoto de cogumelos. 
+Até aqui, exploramos ferramentas. Agora é hora de ver essas ferramentas em ação — como um chef de cozinha que conhece suas facas e panelas, mas quer mesmo é saber como preparar um belo risoto de cogumelos.
 
 Este capítulo apresenta cenários reais que vão desde a consulta simples até a manipulação condicional de dados, passando por joins, paginação dinâmica, construção de filtros em tempo de execução, e integração com endpoints REST.
 
@@ -626,6 +669,7 @@ resumo = Usuario.all()\
 ```
 
 O resultado será uma lista como:
+
 ```python
 [
   {"perfil": "admin", "total": 12},
@@ -693,18 +737,19 @@ usuarios = Usuario.all()\
 
 for usuario in usuarios:
     usuario.update(ativo=False)
+
+
+# Ou
+
+for usuario in usuarios:
+    User.updateWhere(ativo=False, ('id', usuario['id']))
 ```
 
 ---
 
-Esses são apenas alguns exemplos reais que mostram o poder da arquitetura quando aplicada com criatividade e clareza. 
+Esses são apenas alguns exemplos reais que mostram o poder da arquitetura quando aplicada com criatividade e clareza.
 
 No próximo capítulo, vamos tratar de boas práticas, erros comuns e como evitar surpresas desagradáveis em produção.
-
-
-
-
-
 
 ---
 
@@ -790,12 +835,6 @@ Dominar a arquitetura não é apenas aprender como usá-la, mas também como **n
 
 No próximo capítulo, fecharemos com orientações sobre testes, extensões futuras e como essa arquitetura pode evoluir junto com seu sistema.
 
-
-
-
-
-
-
 ---
 
 ## Capítulo 8 – Testes, Extensões e o Futuro: adaptando sua arquitetura para crescer com você
@@ -837,6 +876,7 @@ def test_usuario_insert(session):
 ```
 
 #### Dica de ouro:
+
 Evite reusar sessões entre testes. Cada teste deve começar com banco limpo.
 
 ---
@@ -854,6 +894,7 @@ class CustomMixin(CRUDMixin):
 ```
 
 Depois, use isso em seus modelos:
+
 ```python
 class Usuario(Base, CustomMixin):
     ...
@@ -876,11 +917,10 @@ def listar():
 ```
 
 #### Cuidado:
+
 Use sempre sessões curtas e encapsuladas em rotas para evitar problemas de concorrência.
 
-
 ---
-
 
 ## Capítulo 9 – Validação Inteligente com Elegância: erros que explicam, não confundem
 
@@ -927,8 +967,8 @@ class User(Base, CRUDMixin):
 
 Essas regras dizem:
 
-- `name` é obrigatório  
-- `email` é obrigatório e deve ter formato válido  
+- `name` é obrigatório
+- `email` é obrigatório e deve ter formato válido
 - `password` é obrigatório
 
 Você pode adicionar quantas regras quiser, e elas serão automaticamente aplicadas ao usar `.insert()`, `.create()` e `.update()`.
@@ -944,6 +984,7 @@ User.insert(name="", email="errado", password=None)
 ```
 
 Resultado:
+
 ```python
 ValidationError: {
   'name': ['Este campo é obrigatório.'],
@@ -959,6 +1000,7 @@ usuario.update(email="sem-arroba", name="  ")
 ```
 
 Retorno esperado:
+
 ```python
 ValidationError: {
   'name': ['Este campo é obrigatório.'],
@@ -1022,6 +1064,7 @@ User.create(dados)
 ```
 
 Resultado:
+
 ```
 [VALIDAÇÃO] Erro no registro 2: {
   'name': ['Este campo é obrigatório.'],
@@ -1031,7 +1074,6 @@ Resultado:
 ```
 
 ---
-
 
 ### 9.7. Validar dados sem salvar: uso direto do `validate_or_fail`
 
@@ -1123,7 +1165,6 @@ Validar sem salvar é como fazer um test-drive antes de comprar: você ganha con
 
 ---
 
-
 ### 9.8. Dicas finais
 
 - Toda validação é feita **antes** de persistir no banco
@@ -1134,7 +1175,6 @@ Validar sem salvar é como fazer um test-drive antes de comprar: você ganha con
 ---
 
 Com isso, você fecha mais uma camada de robustez no seu sistema. Seu ORM agora não apenas consulta e salva dados — ele **protege** seus dados com validações claras, consistentes e automatizadas.
-
 
 ---
 
@@ -1190,8 +1230,8 @@ Qualquer tentativa de preencher esses campos será ignorada silenciosamente.
 
 ### 10.3. Quando usar `fillable` vs `guarded`
 
-| Situação                              | Recomendado |
-|--------------------------------------|-------------|
+| Situação                             | Recomendado |
+| ------------------------------------ | ----------- |
 | Poucos campos confiáveis             | `fillable`  |
 | Muitos campos, poucos proibidos      | `guarded`   |
 | Modelos expostos em APIs públicas    | `fillable`  |
@@ -1251,6 +1291,10 @@ Tudo isso funciona tanto para `.insert()` quanto `.create()` e `.update()`.
 
 ```python
 usuario.update(nome="Novo Nome", email="atualizado@a.com")
+
+# Ou
+
+User.updateWhere({"nome":"Novo Nome", "email":"atualizado@a.com"}, ('id', 110))
 ```
 
 Se os campos estiverem em `fillable` e mapeados em `aliases`, eles passam!
@@ -1270,7 +1314,6 @@ Usar `fillable`, `guarded` e `aliases` é como configurar uma porta de entrada c
 
 Com isso, seus models estão não apenas mais seguros — mas também mais compreensíveis por quem fala a língua dos dados… ou a língua dos usuários.
 
-
 ---
 
 #### Sugestões práticas:
@@ -1279,7 +1322,6 @@ A estrutura atual destas classes funcionam muito bem em projetos médios. Mas, c
 
 Separe os domínio em módulos para facilitar a manutenção dos seus projetos (ex: `usuario/`, `produto/`, `financeiro/`)
 
-
 ---
 
 Ao longo deste manual, você viu como uma estrutura bem desenhada com SQLAlchemy pode ir muito além do básico. Agora você tem em mãos não apenas uma biblioteca — mas uma base sólida, expressiva e expansível para qualquer aplicação profissional.
@@ -1287,7 +1329,3 @@ Ao longo deste manual, você viu como uma estrutura bem desenhada com SQLAlchemy
 Mais do que saber usar, você sabe adaptar, refatorar e evoluir.
 
 Missão cumprida.
-
-
-
-

@@ -3,7 +3,11 @@
 import os
 import sys
 import re
+<<<<<<< HEAD
 from sqlalchemy import MetaData, Column, ForeignKey, text
+=======
+from sqlalchemy import MetaData, Column, ForeignKey
+>>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
 from models.db import get_engine, get_schema
 from models.crud import CRUDMixin
 
@@ -18,7 +22,11 @@ def camel_case(s: str) -> str:
 def generate_model_file(table, schema, output_dir='models'):
     """
     Gera um arquivo .py com o modelo SQLAlchemy para a tabela informada.
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
     - Se a coluna for PK, gera primary_key=True.
     - Adiciona index, unique, etc., conforme flags da coluna.
     - Insere ForeignKey se houver.
@@ -33,8 +41,11 @@ def generate_model_file(table, schema, output_dir='models'):
     columns_lines = []
     need_foreignkey_import = False  # Indica se é necessário importar ForeignKey
     need_expression_import = False  # Indica se é necessário importar expression (ex.: para boolean)
+<<<<<<< HEAD
     needs_text_import = False       # Indica se é necessário importar text() para server_default numérico
     need_array_import = False       # Indica se é necessário importar ARRAY do PostgreSQL
+=======
+>>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
 
     # Percorre as colunas refletidas
     for col in table.columns:
@@ -83,8 +94,12 @@ def generate_model_file(table, schema, output_dir='models'):
                         params.append(f"server_default=f{repr(default_val)}")
                     else:
                         if default_val.isdigit():
+<<<<<<< HEAD
                             params.append(f"server_default=text('{default_val}')")
                             needs_text_import = True
+=======
+                            params.append(f"server_default={default_val}")
+>>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
                         else:
                             params.append(f"server_default={repr(default_val)}")
 
@@ -103,6 +118,7 @@ def generate_model_file(table, schema, output_dir='models'):
     if need_foreignkey_import and 'ForeignKey' not in base_types_import:
         base_types_import += ', ForeignKey'
 
+<<<<<<< HEAD
     # Monta o cabeçalho com os imports, utilizando imports absolutos para os módulos do projeto.
     header_lines = [f"from sqlalchemy import Column, {base_types_import}"]
     if need_array_import:
@@ -115,6 +131,15 @@ def generate_model_file(table, schema, output_dir='models'):
         "from models.db import Base",
         "from models.crud import CRUDMixin",
         "from models.utils.validator import validate_or_fail",
+=======
+    # Monta o cabeçalho com os imports
+    header_lines = [f"from sqlalchemy import Column, {base_types_import}"]
+    if need_expression_import:
+        header_lines.append("from sqlalchemy.sql import expression")
+    header_lines.extend([
+        "from .db import Base",
+        "from .crud import CRUDMixin",
+>>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
         ""
     ])
     header = "\n".join(header_lines)
@@ -129,10 +154,15 @@ def generate_model_file(table, schema, output_dir='models'):
         if col.primary_key:
             continue
         field_rules = []
+<<<<<<< HEAD
         # Não adiciona a regra "required" se o nome da coluna for created_at, updated_at ou deleted_at
         if col.name not in ["created_at", "updated_at", "deleted_at"]:
             if not col.nullable:
                 field_rules.append("required")
+=======
+        if not col.nullable:
+            field_rules.append("required")
+>>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
         col_type_name = type(col.type).__name__.lower()
         if col_type_name in ["string", "text"]:
             field_rules.append("string")
@@ -146,6 +176,10 @@ def generate_model_file(table, schema, output_dir='models'):
             field_rules.append("datetime")
         if field_rules:
             rules_lines.append(f"            '{col.name}': {field_rules},")
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
     rules_method = f"""    fillable = {fillable}
 
     @classmethod
