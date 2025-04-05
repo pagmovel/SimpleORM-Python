@@ -2,13 +2,9 @@ from .db import SessionLocal
 from sqlalchemy import or_
 from sqlalchemy.sql.sqltypes import String, Text
 from sqlalchemy.orm import sessionmaker
-<<<<<<< HEAD
 from models.utils.validator import validate_or_fail, ValidationError
 
 
-=======
-from .utils.validator import validate_or_fail
->>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
 
 
 class QueryChain:
@@ -541,10 +537,6 @@ class CRUDMixin:
 
             # Validação automática, se houver regras (rules) definidas no model
             if hasattr(cls, "rules"):
-<<<<<<< HEAD
-=======
-                from utils.validator import validate_or_fail
->>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
                 validate_or_fail(clean_data, cls.rules())
 
             try:
@@ -700,10 +692,6 @@ class CRUDMixin:
 
         # Validação automática baseada nas regras do modelo, se definidas
         if hasattr(cls, "rules"):
-<<<<<<< HEAD
-=======
-            from utils.validator import validate_or_fail, ValidationError
->>>>>>> 77bba562c619e00c66c854c39d39e3f8affae1de
             try:
                 validate_or_fail(update_data, cls.rules())
             except ValidationError as ve:
