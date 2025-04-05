@@ -1,8 +1,10 @@
-from models.db import SessionLocal
+from .db import SessionLocal
 from sqlalchemy import or_
 from sqlalchemy.sql.sqltypes import String, Text
 from sqlalchemy.orm import sessionmaker
-from utils.validator import validate_or_fail
+from models.utils.validator import validate_or_fail, ValidationError
+
+
 
 
 class QueryChain:
@@ -358,6 +360,7 @@ class CRUDMixin:
       - insert(**kwargs): Insere um registro.
       - create(records): Insere registros em massa.
       - update(**kwargs): Atualiza o registro.
+      - updateWhere(**kwargs): Atualiza registros que satisfaçam os filtros.
       - delete(): Remove o registro.
     """
     @classmethod
@@ -501,33 +504,56 @@ class CRUDMixin:
         return data
 
     @classmethod
-    def insert(cls, **kwargs):
+    def insert(cls, data=None, **kwargs):
         """
-        Insere um registro no banco de dados.
-        Exemplo:
-          novo = Modelo.insert(nome="Alice")
+        Insere um ou mais registros no banco de dados, obedecendo regras de validação e permissões.
+        
+        Pode ser usado de três formas:
+        1. Com argumentos nomeados: insert(campo=valor, campo2=valor2, ...)
+        2. Com um dicionário: insert({ 'campo': valor, 'campo2': valor2, ... })
+        3. Com uma lista de dicionários: insert([{'campo': valor}, {'campo': valor2}, ...])
+        
+        Retorna a instância inserida (no caso de inserção única) ou o resultado de create() para inserção em massa.
         """
-        session = SessionLocal()
-        clean_data = cls._apply_aliases(kwargs)
-        clean_data = cls._filter_fillable(clean_data)
+        # Se não for passado o parâmetro 'data', usa os kwargs
+        if data is None:
+            data = kwargs
+        # Se for passado 'data' e também kwargs, mescla os dois (priorizando kwargs)
+        elif kwargs:
+            if isinstance(data, dict):
+                data.update(kwargs)
+            else:
+                raise ValueError("Quando 'data' é uma lista, não se deve passar argumentos nomeados.")
 
-        # Aplica validação automaticamente, se houver rules()
-        if hasattr(cls, "rules"):
-            from utils.validator import validate_or_fail
-            validate_or_fail(clean_data, cls.rules())
+        # Se 'data' for uma lista, delega à função create()
+        if isinstance(data, list):
+            return cls.create(data)
 
-        try:
-            instance = cls(**clean_data)
-            session.add(instance)
-            session.commit()
-            session.refresh(instance)
-        except Exception as e:
-            session.rollback()
-            print(f"[ERRO BD] Falha ao inserir {cls.__name__}: {str(e).splitlines()[0]}")
-            raise e
-        finally:
-            session.close()
-        return instance
+        # Se 'data' for um dicionário, prossegue com a inserção única
+        if isinstance(data, dict):
+            session = SessionLocal()
+            clean_data = cls._apply_aliases(data)
+            clean_data = cls._filter_fillable(clean_data)
+
+            # Validação automática, se houver regras (rules) definidas no model
+            if hasattr(cls, "rules"):
+                validate_or_fail(clean_data, cls.rules())
+
+            try:
+                instance = cls(**clean_data)
+                session.add(instance)
+                session.commit()
+                session.refresh(instance)
+            except Exception as e:
+                session.rollback()
+                print(f"[ERRO BD] Falha ao inserir {cls.__name__}: {str(e).splitlines()[0]}")
+                raise e
+            finally:
+                session.close()
+            return instance
+        else:
+            raise ValueError("Formato de dados inválido para insert().")
+
 
     @classmethod
     def create(cls, records):
@@ -545,7 +571,7 @@ class CRUDMixin:
 
                 # Validação com feedback claro
                 if hasattr(cls, "rules"):
-                    from utils.validator import validate_or_fail, ValidationError
+                    
                     try:
                         validate_or_fail(clean_data, cls.rules())
                     except ValidationError as ve:
@@ -604,7 +630,6 @@ class CRUDMixin:
 
         #  Validação automática baseada nas regras do modelo
         if hasattr(self.__class__, "rules"):
-            from utils.validator import validate_or_fail, ValidationError
             try:
                 validate_or_fail(update_data, self.__class__.rules())
             except ValidationError as ve:
@@ -626,6 +651,79 @@ class CRUDMixin:
             session.close()
 
         return instance
+
+
+    @classmethod
+    def updateWhere(cls, data, where):
+        """
+        Atualiza registros do modelo no banco de dados que atendam à condição especificada.
+
+        Este método realiza a atualização de um ou mais registros com base nos dados fornecidos,
+        aplicando automaticamente os aliases, filtrando apenas os campos permitidos (fillable)
+        e validando os dados de acordo com as regras definidas (se houver). A condição para a atualização
+        é definida pelo parâmetro 'where', que deve ser uma tupla no formato (nome_da_coluna, valor).
+
+        Parâmetros:
+            data (dict): Dicionário contendo os campos e os respectivos valores que devem ser atualizados.
+                        Os dados serão processados pelas funções _apply_aliases e _filter_fillable do modelo.
+            where (tuple): Tupla com dois elementos, onde:
+                        - O primeiro elemento é o nome da coluna (string) usada para filtrar o registro.
+                        - O segundo elemento é o valor que essa coluna deve ter para que o registro seja atualizado.
+                        Exemplo: ('id', 110)
+
+        Retorno:
+            - Se apenas um registro for atualizado (i.e., updated_rows == 1), retorna a instância atualizada.
+            - Caso a atualização afete múltiplos registros, retorna uma lista com todas as instâncias atualizadas.
+
+        Exceções:
+            - ValidationError: Se os dados em 'data' não cumprirem as regras definidas no método rules() do modelo.
+            - Exception: Qualquer exceção que ocorra durante o processo de atualização resulta em rollback da transação,
+                        e a exceção é propagada após a mensagem de erro ser impressa.
+
+        Observações:
+            - O método utiliza uma sessão do SQLAlchemy (SessionLocal) para executar a atualização.
+            - Após atualizar os registros, o método executa um commit e, em seguida, reconsulta o registro (ou registros)
+            atualizado(s) para retorná-los.
+            - Em caso de erro durante a operação, a sessão é revertida (rollback) e a exceção é lançada.
+        """
+        session = SessionLocal()
+        update_data = cls._apply_aliases(data)
+        update_data = cls._filter_fillable(update_data)
+
+        # Validação automática baseada nas regras do modelo, se definidas
+        if hasattr(cls, "rules"):
+            try:
+                validate_or_fail(update_data, cls.rules())
+            except ValidationError as ve:
+                print(f"[VALIDAÇÃO] Erro na atualização: {ve.errors}")
+                raise ve
+
+        try:
+            # Supondo que 'where' seja uma tupla, ex: ('id', 110)
+            filter_column = getattr(cls, where[0])
+            if isinstance(where[1], (list, tuple)):
+                query = session.query(cls).filter(filter_column.in_(where[1]))
+            else:
+                query = session.query(cls).filter(filter_column == where[1])
+            # query = session.query(cls).filter(filter_column == where[1])
+            updated_rows = query.update(update_data, synchronize_session=False)
+            session.commit()
+
+            # Se for esperado que apenas um registro seja atualizado,
+            # reconsulta para retornar o registro atualizado.
+            if updated_rows == 1:
+                updated_instance = session.query(cls).filter(filter_column == where[1]).first()
+                return updated_instance  # ou, se preferir, updated_instance.to_dict() ou updated_instance.id
+            else:
+                # Se atualizou mais de um registro, pode-se retornar uma lista ou o número de linhas atualizadas
+                return query.all()
+        except Exception as e:
+            session.rollback()
+            print(f"[ERRO BD] Falha ao atualizar {cls.__class__.__name__}: {str(e).splitlines()[0]}")
+            raise e
+        finally:
+            session.close()
+
 
 
 
